@@ -67,12 +67,12 @@ p { margin: 0; }
 /* Hero */
 .hero { padding-block: clamp(36px, 6vw, 72px) clamp(56px, 8vw, 96px); position: relative; }
 .hero-stage { position: relative; }
-.s1 { width: clamp(220px, 34vw, 430px); aspect-ratio: 1; left: -5%; bottom: -13%; }
+.s1 { width: clamp(180px, 25vw, 320px); aspect-ratio: 1; left: -7%; bottom: -19%; }
 .s2 { width: clamp(150px, 23vw, 300px); aspect-ratio: 1; right: -3%; top: -9%; }
 .s3 { width: clamp(70px, 9vw, 120px); aspect-ratio: 1; left: 45%; top: -7%; }
-.hero-panel { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(24px, 4vw, 48px); align-items: center; padding: clamp(28px, 5vw, 64px); border-radius: 34px; }
+.hero-panel { background: linear-gradient(135deg, rgba(26, 21, 18, .72), rgba(26, 21, 18, .42)); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(24px, 4vw, 48px); align-items: center; padding: clamp(28px, 5vw, 64px); border-radius: 34px; }
 .hero-copy { display: grid; gap: 22px; justify-items: start; min-width: 0; }
-h1 { font-size: clamp(38px, 6.6vw, 76px); line-height: .98; font-weight: 900; letter-spacing: -.025em; }
+h1 { font-size: clamp(32px, 4.9vw, 60px); line-height: 1; font-weight: 900; letter-spacing: -.025em; }
 h1 em { font-style: normal; color: var(--orange); }
 .lede { font-size: clamp(18px, 2vw, 21px); color: #e2d9d2; max-width: 34em; }
 .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
@@ -81,7 +81,7 @@ h1 em { font-style: normal; color: var(--orange); }
 .btn.primary:hover { transform: translateY(-2px); background: #ff6c1d; }
 .btn.ghost { border: 1px solid var(--line); background: rgba(255, 255, 255, .05); }
 .btn.ghost:hover { background: rgba(255, 255, 255, .1); }
-.note { font-size: 14px; color: var(--muted); }
+.note { font-size: 14px; color: #e2d9d2; }
 
 /* Radar demo: the extension's real data shape, marked as an example */
 .demo-stack { position: relative; display: grid; gap: 14px; min-width: 0; }
