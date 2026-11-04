@@ -43,6 +43,7 @@ h3 { font-size: 21px; line-height: 1.2; font-weight: 700; }
 p { margin: 0; }
 .wrap { max-width: 1180px; margin-inline: auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); position: relative; }
 .section { padding-block: clamp(64px, 9vw, 120px); position: relative; }
+.head, .promises, .faq, .log, .road, .intro, .two h2, .label { position: relative; z-index: 1; }
 .head { display: grid; gap: 14px; max-width: 680px; margin-bottom: clamp(32px, 5vw, 56px); }
 .head p { color: var(--muted); font-size: 19px; }
 .label { font: 700 12px/1.2 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--orange-soft); }
@@ -69,6 +70,7 @@ p { margin: 0; }
 .hero-stage { position: relative; }
 .s1 { width: clamp(180px, 25vw, 320px); aspect-ratio: 1; left: -7%; bottom: -19%; }
 .s2 { width: clamp(150px, 23vw, 300px); aspect-ratio: 1; right: -3%; top: -9%; }
+.s-plans { width: clamp(180px, 26vw, 340px); aspect-ratio: 1; right: -2%; top: 18%; }
 .s3 { width: clamp(70px, 9vw, 120px); aspect-ratio: 1; left: 45%; top: -7%; }
 .hero-panel { background: linear-gradient(135deg, rgba(26, 21, 18, .72), rgba(26, 21, 18, .42)); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(24px, 4vw, 48px); align-items: center; padding: clamp(28px, 5vw, 64px); border-radius: 34px; }
 .hero-copy { display: grid; gap: 22px; justify-items: start; min-width: 0; }
@@ -174,7 +176,7 @@ h1 em { font-style: normal; color: var(--orange); }
 .closing { padding: clamp(32px, 6vw, 72px); border-radius: 34px; display: grid; gap: 18px; justify-items: start; }
 .closing h2 { max-width: 15em; }
 .closing p { color: #e2d9d2; max-width: 36em; }
-footer { border-top: 1px solid var(--line); padding-block: 34px 46px; color: var(--muted); font-size: 14px; }
+footer { position: relative; z-index: 1; border-top: 1px solid var(--line); padding-block: 34px 46px; color: var(--muted); font-size: 14px; }
 .foot { display: grid; gap: 14px; }
 .foot-links { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--paper); }
 .foot-links a { text-underline-offset: 3px; }
@@ -198,6 +200,12 @@ footer { border-top: 1px solid var(--line); padding-block: 34px 46px; color: var
   .feature.flip .feat-copy { order: 0; }
   .promises { grid-template-columns: minmax(0, 1fr); }
   .frame.narrow { justify-self: start; }
+  /* Phones: spheres stay behind the glass panels, never over text. */
+  .s1 { width: 170px; left: -12%; bottom: 8%; }
+  .s2 { width: 130px; right: -6%; top: -3%; }
+  .s-plans { width: 170px; right: -8%; top: auto; bottom: 22%; }
+  /* The bar stays solid up to the top edge, so text never shows behind the clock. */
+  .nav-shell { top: 0; padding-top: calc(env(safe-area-inset-top, 0px) + 10px); padding-bottom: 8px; background: linear-gradient(to bottom, var(--ink) 72%, transparent); }
 }
 </style>
 <style>body{margin:0}[hidden]{display:none!important}</style>
@@ -380,7 +388,7 @@ footer { border-top: 1px solid var(--line); padding-block: 34px 46px; color: var
 
   <section class="section" id="planes" style="padding-top:0">
     <div class="wrap">
-      <span class="sphere float slow" data-depth="20" style="width:clamp(180px,26vw,340px);aspect-ratio:1;right:-2%;top:18%" aria-hidden="true"></span>
+      <span class="sphere s-plans float slow" data-depth="20" aria-hidden="true"></span>
       <div class="head">
         <span class="label">Planes</span>
         <h2>Empieza gratis. Pasa a Premium cuando lo necesites.</h2>
