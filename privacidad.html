@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
 <title>Política de privacidad · Mila.Desk</title>
 <style>
   :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #17212b; background: #f7f8fa; }
@@ -46,6 +47,7 @@
       <tr><td>Free Samples: nombre de la marca, sus categorías de Amazon, enlace a sus campañas y la imagen de prueba que subas</td><td>Que un administrador verifique la marca y que los demás usuarios sepan que esa marca envía muestras</td><td>Nube de Mila.Desk (la imagen, en un almacenamiento privado)</td></tr>
       <tr><td>Tipo de acceso (gratis, beta para creadores, regalo o suscripción), su fecha de fin y el código beta que usaste</td><td>Saber si puedes usar las funciones premium</td><td>Nube de Mila.Desk</td></tr>
       <tr><td>Si compras Premium: tu correo, el estado de tu suscripción, su fecha y el nombre del plan. El pago (tarjeta, facturación e impuestos) lo procesa nuestro proveedor de pagos, Lemon Squeezy, al que enviamos el identificador de tu cuenta de Mila.Desk para activar tu acceso; Mila.Desk nunca ve ni guarda los datos de tu tarjeta</td><td>Activar, renovar o terminar tu acceso Premium automáticamente</td><td>Nube de Mila.Desk; el pago, en el proveedor de pagos</td></tr>
+      <tr><td>Si empiezas la prueba gratis: una huella cifrada de tu correo y de tu identificador de creador de Amazon, la fecha y tu cuenta</td><td>Que cada persona use una sola prueba gratis. La huella no permite recuperar el correo ni el identificador</td><td>Nube de Mila.Desk; la huella se conserva aunque elimines tu cuenta</td></tr>
       <tr><td>Datos públicos de productos de Amazon: ASIN, título, precio y compras del último mes</td><td>Mostrar información de productos más rápido a todos los usuarios</td><td>Nube de Mila.Desk, compartidos (no son datos personales)</td></tr>
       <tr><td>Comisiones y ganancias, posición de tus videos, historial de precios, ventas diarias del informe de Amazon que abras, tus mensajes rápidos (incluida tu dirección si la escribes), ajustes, el último correo con el que entraste y, si lo eliges, tu sesión iniciada (nunca tu contraseña)</td><td>Video Intelligence, mensajes rápidos y preferencias de la extensión</td><td>Solo en tu navegador (no se envían a la nube)</td></tr>
     </tbody>
@@ -64,7 +66,7 @@
   <p>Toda la comunicación usa conexiones cifradas (HTTPS). La base de datos aplica reglas de acceso por usuario (Row Level Security), y las imágenes de prueba se guardan en un almacenamiento privado.</p>
 
   <h2>5. Cuánto tiempo se guardan</h2>
-  <p>Los datos de tu cuenta se guardan mientras la cuenta exista. Si eliminas tu cuenta, se borran tus datos y tus imágenes de prueba; las marcas de Free Samples que ya estaban aprobadas se conservan para la comunidad, pero sin tu nombre ni ningún dato tuyo. Los datos que solo están en tu navegador se borran al desinstalar la extensión, y las memorias temporales de Video Intelligence se limpian solas con el tiempo.</p>
+  <p>Los datos de tu cuenta se guardan mientras la cuenta exista. Si eliminas tu cuenta, se borran tus datos y tus imágenes de prueba, salvo la huella de la prueba gratis, que se conserva para que la prueba no se repita; las marcas de Free Samples que ya estaban aprobadas se conservan para la comunidad, pero sin tu nombre ni ningún dato tuyo. Los datos que solo están en tu navegador se borran al desinstalar la extensión, y las memorias temporales de Video Intelligence se limpian solas con el tiempo.</p>
 
   <h2>6. Tus derechos</h2>
   <p>Puedes eliminar tu cuenta y sus datos en cualquier momento desde la configuración de la extensión («Eliminar mi cuenta»), y exportar una copia desde la misma pantalla. También puedes pedir una copia, su corrección o su eliminación por correo. Para cualquier solicitud, escríbenos a <a href="mailto:milanes@mila-desk.com">milanes@mila-desk.com</a>.</p>
@@ -79,7 +81,7 @@
     <h2>Summary in English</h2>
     <p>Mila.Desk is an independent tool, not affiliated with or endorsed by Amazon. It helps Amazon creators manage Creator Connections.</p>
     <ul>
-      <li><strong>Stored in the cloud (Supabase):</strong> your account email and creator username (the password is handled by Supabase Auth); conversation metadata (brand name, conversation identifier, message counts, last sender and date — never the message text); your collaborations and analysis summaries; your access type (free, beta, gift or subscription); if you buy Premium, your email and subscription status (payments are processed by Lemon Squeezy, which receives your Mila.Desk account ID to activate access; we never see your card); Free Samples submissions with their proof image; and shared public product facts (ASIN, title, price, monthly purchases).</li>
+      <li><strong>Stored in the cloud (Supabase):</strong> your account email and creator username (the password is handled by Supabase Auth); conversation metadata (brand name, conversation identifier, message counts, last sender and date — never the message text); your collaborations and analysis summaries; your access type (free, beta, gift or subscription); if you start the free trial, one-way fingerprints of your email and Amazon creator ID, kept after account deletion so a trial is not repeated; if you buy Premium, your email and subscription status (payments are processed by Lemon Squeezy, which receives your Mila.Desk account ID to activate access; we never see your card); Free Samples submissions with their proof image; and shared public product facts (ASIN, title, price, monthly purchases).</li>
       <li><strong>Kept only in your browser:</strong> commission and earnings data, video positions, price history, daily sales, quick messages (including your address if you enter it), settings, your last sign-in email and, if you choose, your signed-in session (never your password).</li>
       <li><strong>Who can see it:</strong> your data is isolated per account. Administrators only see Free Samples submissions for review. Other users only see approved brand names and public product facts.</li>
       <li><strong>Never:</strong> we never ask for or store your Amazon password, never sell your data or share it beyond the providers named above (Supabase, Lemon Squeezy, Resend for account emails, and GitHub Pages and Google Fonts for the website), and run no ads or analytics.</li>
