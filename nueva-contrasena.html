@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0e0c0b">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; connect-src https://sbbcjnsyljjdljoihack.supabase.co; base-uri 'none'; form-action 'none'">
+<link rel="icon" type="image/png" sizes="128x128" href="assets/icono.png">
+<title>Nueva contraseña · Mila.Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,800;125,900&family=Figtree:wght@400;600;700&display=swap">
+<style>
+:root { color-scheme: dark; --ink: #0e0c0b; --paper: #fbf6f1; --soft: #e2d9d2; --orange: #ff5800; --amber: #ffb21a; --line: rgba(255, 244, 235, .16); }
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { margin: 0; background: var(--ink); color: var(--paper); font: 400 17px/1.6 "Figtree", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; display: grid; place-items: center; min-height: 100dvh; padding-block: 32px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); overflow-x: clip; }
+.stage { position: relative; width: min(100%, 520px); }
+.sphere { position: absolute; border-radius: 50%; background: radial-gradient(circle at 33% 27%, #ffe88a 0, var(--amber) 20%, #ff7d0c 50%, var(--orange) 68%, #b83200 100%); box-shadow: inset -14px -18px 46px rgba(110, 25, 0, .55), 0 30px 90px rgba(255, 88, 0, .3); }
+.a { width: 190px; height: 190px; right: -54px; top: -62px; }
+.b { width: 120px; height: 120px; left: -44px; bottom: -36px; }
+.card { position: relative; display: grid; gap: 16px; justify-items: start; padding: clamp(28px, 7vw, 44px); border-radius: 30px; border: 1px solid var(--line); background: linear-gradient(135deg, rgba(26, 21, 18, .7), rgba(26, 21, 18, .45)); -webkit-backdrop-filter: blur(24px) saturate(150%); backdrop-filter: blur(24px) saturate(150%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .17), 0 30px 70px rgba(0, 0, 0, .45); }
+.brand { display: inline-flex; align-items: center; gap: 10px; font: 800 18px/1 "Archivo", "Arial Black", Helvetica, sans-serif; font-stretch: 125%; color: inherit; text-decoration: none; }
+.mark { width: 32px; height: 32px; border-radius: 9px; background: var(--orange); color: #141414; display: grid; place-items: center; font-weight: 900; font-size: 19px; }
+h1 { margin: 6px 0 0; font: 900 clamp(30px, 8vw, 42px)/1.05 "Archivo", "Arial Black", Helvetica, sans-serif; font-stretch: 125%; letter-spacing: -.02em; text-wrap: balance; }
+p { margin: 0; color: var(--soft); }
+.next { font-weight: 600; color: var(--paper); }
+.link { color: #ffb48a; font-weight: 600; text-underline-offset: 3px; }
+.view { display: grid; gap: 12px; width: 100%; }
+form { display: grid; gap: 16px; margin-top: 8px; }
+label { display: grid; gap: 7px; font-size: 15px; font-weight: 600; color: var(--paper); }
+input { width: 100%; min-height: 52px; padding: 0 16px; color: var(--paper); background: rgba(255, 255, 255, .05); border: 1px solid var(--line); border-radius: 15px; font: 400 17px/1.2 "Figtree", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+button { min-height: 52px; padding: 0 24px; color: #140a04; background: var(--orange); border: 0; border-radius: 15px; font: 700 16px/1 "Figtree", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; cursor: pointer; transition: transform .2s, background .2s; }
+button:hover:not(:disabled) { transform: translateY(-2px); background: #ff6c1d; }
+button:disabled { opacity: .6; cursor: default; }
+.status { color: #ffb48a; font-size: 15px; font-weight: 600; line-height: 1.45; }
+.status:empty { display: none; }
+a:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+a:focus-visible { border-radius: 8px; }
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) { button { transition: none; } button:hover:not(:disabled) { transform: none; } }
+</style>
+</head>
+<body>
+<div class="stage">
+  <span class="sphere a" aria-hidden="true"></span>
+  <span class="sphere b" aria-hidden="true"></span>
+  <main class="card">
+    <a class="brand" href="/"><span class="mark" aria-hidden="true">M</span>Mila.Desk</a>
+
+    <section id="viewChecking" class="view">
+      <h1>Comprobando el enlace…</h1>
+    </section>
+
+    <section id="viewForm" class="view" hidden>
+      <h1>Crea tu contraseña nueva</h1>
+      <p>Usa al menos 8 caracteres.</p>
+      <form id="resetForm" novalidate>
+        <label>Contraseña nueva
+          <input id="newPassword" type="password" autocomplete="new-password" required>
+        </label>
+        <label>Repite la contraseña
+          <input id="confirmPassword" type="password" autocomplete="new-password" required>
+        </label>
+        <p id="formStatus" class="status" role="alert"></p>
+        <button id="savePassword" type="submit">Guardar contraseña</button>
+      </form>
+    </section>
+
+    <section id="viewInvalid" class="view" hidden>
+      <h1>Este enlace ya no sirve</h1>
+      <p>Puede que haya caducado o que ya lo hayas usado.</p>
+      <p class="next">Abre la extensión, escribe tu correo y pulsa «¿Olvidaste tu contraseña?» para recibir otro enlace.</p>
+    </section>
+
+    <section id="viewDone" class="view" hidden>
+      <h1>¡Contraseña cambiada!</h1>
+      <p>Si tenías la sesión abierta en otro navegador, quizá tengas que iniciarla de nuevo.</p>
+      <p class="next">Vuelve a la extensión e inicia sesión con tu correo y tu contraseña nueva.</p>
+    </section>
+
+    <noscript><p>Esta página necesita JavaScript para cambiar tu contraseña.</p></noscript>
+    <a class="link" href="/">Ir a mila-desk.com</a>
+  </main>
+</div>
+<script src="nueva-contrasena.js"></script>
+</body>
+</html>
