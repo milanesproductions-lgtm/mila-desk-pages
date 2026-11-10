@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<!-- Paddle.js (checkout) needs its CDN, its checkout frames and its API; nothing else is allowed. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.paddle.com https://public.profitwell.com; style-src 'unsafe-inline' https://cdn.paddle.com; frame-src https://buy.paddle.com https://sandbox-buy.paddle.com; connect-src https://*.paddle.com; img-src 'self' data: https://cdn.paddle.com; base-uri 'none'; form-action 'none'">
+<title>Pago · Mila.Desk</title>
+<link rel="icon" type="image/png" sizes="128x128" href="assets/icono.png">
+<style>
+  :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #17212b; background: #f7f8fa; }
+  body { margin: 0; padding: 32px 16px; }
+  main { max-width: 520px; margin: 0 auto; background: #fff; border: 1px solid #e7eaee; border-radius: 18px; padding: 32px 28px; text-align: center; }
+  .logo { width: 48px; height: 48px; border-radius: 12px; background: #ff5800; color: #141414; font-weight: 900; font-size: 28px; display: grid; place-items: center; margin: 0 auto 16px; }
+  h1 { font-size: 22px; margin: 0 0 10px; }
+  p { font-size: 15px; line-height: 1.6; color: #2c3640; margin: 0 0 12px; }
+  button { font: inherit; font-weight: 700; background: #ff5800; color: #141414; border: 0; border-radius: 10px; padding: 12px 20px; cursor: pointer; }
+  .small { font-size: 13px; color: #56616d; }
+  a { color: #b33f00; }
+</style>
+</head>
+<body>
+<main>
+  <div class="logo">M</div>
+  <h1 id="title">Abriendo el pago seguro…</h1>
+  <p id="text">El pago lo procesa Paddle, nuestro proveedor de pagos.</p>
+  <p><button id="open" type="button" hidden>Abrir el pago</button></p>
+  <p class="small" id="legal">Paddle.com es el comerciante registrado de todos nuestros pedidos. <a href="terminos.html">Términos</a> · <a href="reembolsos.html">Reembolsos</a> · <a href="privacidad.html">Privacidad</a></p>
+</main>
+<script>
+// Mila.Desk checkout (Paddle Billing). The extension opens
+//   pagar.html#plan=monthly|annual&trial=0|1&uid=<account id>&lang=es|en
+// The data travels in the # part, which the browser never sends to any server. The
+// account id goes to Paddle as custom_data.user_id, and the billing webhook uses it to
+// turn on Premium for that account. A trial only gives Premium if the account reserved it
+// first (reserve_trial() in Supabase), so opening the trial plan by hand gives nothing.
+// Client-side tokens and price ids are public by design (Paddle documents them as safe
+// in the browser); no secret goes in this page.
+// Paddle approved the account on 2026-11-10. "#…&env=sandbox" uses the test account
+// instead (no real money); a sandbox payment only gives Premium while the webhook's
+// BILLING_ALLOW_TEST_MODE setting is "true", which stays off in production.
+const ACCOUNTS = {
+  production: {
+    environment: "production",
+    token: "live_7dc23360a16139f31621a260c44",
+    prices: {
+      monthly: { normal: "pri_01m731brqgkbgyhd65z50benht", trial: "pri_01m732dyjm6vdabkf5d833azv9" },
+      annual:  { normal: "pri_01m731c1bwrhzv99gy3y123tm3", trial: "pri_01m732errrq9wg2q4tmesbnbgm" }
+    }
+  },
+  sandbox: {
+    environment: "sandbox",
+    token: "test_fdb413dfbfa4f32941c57eb6745",
+    prices: {
+      monthly: { normal: "pri_01m72yz1ckb9bybk8kkvxehne9", trial: "pri_01m732fxafafj0bsrnvn7farzr" },
+      annual:  { normal: "pri_01m72yzftx9psh0brcc0g1ks3c", trial: "pri_01m732ghtg7pdm8dpp9exvtkpn" }
+    }
+  }
+};
+const params = new URLSearchParams(location.hash.slice(1));
+const PADDLE = params.get("env") === "sandbox" ? ACCOUNTS.sandbox : ACCOUNTS.production;
+const EN = params.get("lang") === "en";
+const TEXT = EN ? {
+  opening: "Opening secure checkout…", by: "Payment is processed by Paddle, our payment provider.",
+  open: "Open checkout", done: "Payment complete", doneText: "Open Mila.Desk again: your Premium access turns on by itself in a few seconds.",
+  closed: "Checkout closed", closedText: "You can open it again whenever you want.",
+  bad: "This payment link isn't valid", badText: "Open the payment from Mila.Desk: Settings → Your access.",
+  fail: "Checkout couldn't load", failText: "Check your connection and try again, or write to us at milanes@mila-desk.com.",
+  legal: 'Paddle.com is the Merchant of Record for all our orders. <a href="en/terminos.html">Terms</a> · <a href="en/reembolsos.html">Refunds</a> · <a href="privacidad.html">Privacy</a>'
+} : {
+  opening: "Abriendo el pago seguro…", by: "El pago lo procesa Paddle, nuestro proveedor de pagos.",
+  open: "Abrir el pago", done: "Pago completado", doneText: "Vuelve a abrir Mila.Desk: tu acceso Premium se activa solo en unos segundos.",
+  closed: "Pago cerrado", closedText: "Puedes abrirlo de nuevo cuando quieras.",
+  bad: "Este enlace de pago no es válido", badText: "Abre el pago desde Mila.Desk: Configuración → Tu acceso.",
+  fail: "No se pudo cargar el pago", failText: "Revisa tu conexión e inténtalo de nuevo, o escríbenos a milanes@mila-desk.com.",
+  legal: null
+};
+const $ = id => document.getElementById(id);
+const show = (title, text, button) => { $("title").textContent = title; $("text").textContent = text; $("open").hidden = !button; };
+if (EN) {
+  document.documentElement.lang = "en"; document.title = "Checkout · Mila.Desk";
+  $("legal").innerHTML = TEXT.legal; // fixed text from this page, never from the link
+}
+$("open").textContent = TEXT.open;
+
+const plan = params.get("plan");
+const uid = String(params.get("uid") || "").toLowerCase();
+const trial = params.get("trial") === "1";
+const priceId = PADDLE.prices[plan] && (trial ? PADDLE.prices[plan].trial : PADDLE.prices[plan].normal);
+const validUid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uid);
+// Drop the account id from the address bar once read.
+history.replaceState(null, "", location.pathname);
+
+function openCheckout() {
+  Paddle.Checkout.open({
+    items: [{ priceId, quantity: 1 }],
+    customData: { user_id: uid },
+    settings: { displayMode: "overlay", theme: "light", locale: EN ? "en" : "es", allowLogout: true }
+  });
+}
+
+if (!validUid || !priceId || !PADDLE.token) {
+  show(TEXT.bad, TEXT.badText, false);
+} else {
+  show(TEXT.opening, TEXT.by, false);
+  const script = document.createElement("script");
+  script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
+  script.onload = () => {
+    try {
+      if (PADDLE.environment === "sandbox") Paddle.Environment.set("sandbox");
+      Paddle.Initialize({
+        token: PADDLE.token,
+        eventCallback: event => {
+          if (event.name === "checkout.completed") show(TEXT.done, TEXT.doneText, false);
+          else if (event.name === "checkout.closed" && $("title").textContent !== TEXT.done) show(TEXT.closed, TEXT.closedText, true);
+        }
+      });
+      $("open").addEventListener("click", openCheckout);
+      openCheckout();
+    } catch { show(TEXT.fail, TEXT.failText, false); }
+  };
+  script.onerror = () => show(TEXT.fail, TEXT.failText, false);
+  document.head.appendChild(script);
+}
+</script>
+</body>
+</html>
