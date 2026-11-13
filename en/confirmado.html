@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0e0c0b">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="icon" type="image/png" sizes="128x128" href="../assets/icono.png">
+<title>Email confirmed · Mila.Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,800;125,900&family=Figtree:wght@400;600;700&display=swap">
+<style>
+:root { color-scheme: dark; --ink: #0e0c0b; --paper: #fbf6f1; --soft: #e2d9d2; --orange: #ff5800; --amber: #ffb21a; --line: rgba(255, 244, 235, .16); }
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { margin: 0; background: var(--ink); color: var(--paper); font: 400 17px/1.6 "Figtree", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; display: grid; place-items: center; min-height: 100dvh; padding-block: 32px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); overflow-x: clip; }
+.stage { position: relative; width: min(100%, 520px); }
+.sphere { position: absolute; border-radius: 50%; background: radial-gradient(circle at 33% 27%, #ffe88a 0, var(--amber) 20%, #ff7d0c 50%, var(--orange) 68%, #b83200 100%); box-shadow: inset -14px -18px 46px rgba(110, 25, 0, .55), 0 30px 90px rgba(255, 88, 0, .3); }
+.a { width: 190px; height: 190px; right: -54px; top: -62px; }
+.b { width: 120px; height: 120px; left: -44px; bottom: -36px; }
+.card { position: relative; display: grid; gap: 16px; justify-items: start; padding: clamp(28px, 7vw, 44px); border-radius: 30px; border: 1px solid var(--line); background: linear-gradient(135deg, rgba(26, 21, 18, .7), rgba(26, 21, 18, .45)); -webkit-backdrop-filter: blur(24px) saturate(150%); backdrop-filter: blur(24px) saturate(150%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .17), 0 30px 70px rgba(0, 0, 0, .45); }
+.brand { display: inline-flex; align-items: center; gap: 10px; font: 800 18px/1 "Archivo", "Arial Black", Helvetica, sans-serif; font-stretch: 125%; color: inherit; text-decoration: none; }
+.mark { width: 32px; height: 32px; border-radius: 9px; background: var(--orange); color: #141414; display: grid; place-items: center; font-weight: 900; font-size: 19px; }
+h1 { margin: 6px 0 0; font: 900 clamp(30px, 8vw, 42px)/1.05 "Archivo", "Arial Black", Helvetica, sans-serif; font-stretch: 125%; letter-spacing: -.02em; text-wrap: balance; }
+p { margin: 0; color: var(--soft); }
+.next { font-weight: 600; color: var(--paper); }
+.link { color: #ffb48a; font-weight: 600; text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 8px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <span class="sphere a" aria-hidden="true"></span>
+  <span class="sphere b" aria-hidden="true"></span>
+  <main class="card">
+    <a class="brand" href="/en/"><span class="mark" aria-hidden="true">M</span>Mila.Desk</a>
+    <div id="ok" style="display:grid;gap:12px">
+      <h1>Email confirmed!</h1>
+      <p>Your Mila.Desk account is ready.</p>
+      <p class="next">Go back to the extension and sign in with your email and password.</p>
+    </div>
+    <div id="fail" style="display:grid;gap:12px" hidden>
+      <h1>This link no longer works</h1>
+      <p>It may have expired or you may have used it already.</p>
+      <p class="next">Go back to the extension and try signing in. If your email still isn't confirmed, sign up again to get a new link.</p>
+    </div>
+    <a class="link" href="/en/">Go to mila-desk.com</a>
+  </main>
+</div>
+<script>
+// Supabase may return session tokens or an error in the URL fragment. This page only
+// shows the result: it reads whether there was an error and removes the rest.
+(() => {
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const failed = hash.has('error') || hash.has('error_code') || new URLSearchParams(location.search).has('error');
+  if (location.hash || location.search) history.replaceState(null, document.title, location.pathname);
+  document.getElementById('ok').hidden = failed;
+  document.getElementById('fail').hidden = !failed;
+})();
+</script>
+</body>
+</html>
