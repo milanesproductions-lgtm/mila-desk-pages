@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e0c0b">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>User guide · Mila.Desk</title>
+<meta name="description" content="Mila.Desk step-by-step guide: installing, your first analysis, reading your results, Campaign Radar, Video Intelligence, Free Samples and sales.">
+<link rel="icon" type="image/png" sizes="128x128" href="../assets/icono.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,500;125,700;125,800;125,900&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  color-scheme: dark;
+  --ink: #0e0c0b;
+  --ink-2: #171412;
+  --paper: #fbf6f1;
+  --soft: #e2d9d2;
+  --muted: #b7ada5;
+  --orange: #ff5800;
+  --orange-soft: #ff8a4c;
+  --amber: #ffb21a;
+  --line: rgba(255, 244, 235, .15);
+  --glass-a: rgba(255, 244, 235, .11);
+  --glass-b: rgba(255, 244, 235, .035);
+  --display: "Archivo", "Arial Black", Helvetica, sans-serif;
+  --body: "Figtree", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --gutter-l: max(20px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(20px, env(safe-area-inset-right, 0px));
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+body { margin: 0; background: var(--ink); color: var(--paper); font: 400 17px/1.6 var(--body); overflow-x: clip; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 8px; }
+h1, h2, h3 { font-family: var(--display); font-stretch: 125%; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(34px, 5.4vw, 64px); line-height: 1; font-weight: 900; letter-spacing: -.025em; }
+h1 em { font-style: normal; color: var(--orange); }
+h2 { font-size: clamp(27px, 3.6vw, 40px); line-height: 1.08; font-weight: 800; letter-spacing: -.015em; }
+h3 { font-size: 19px; line-height: 1.25; font-weight: 700; }
+p { margin: 0; }
+.wrap { max-width: 1180px; margin-inline: auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); position: relative; }
+.label { font: 700 12px/1.2 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--orange-soft); }
+.glass { position: relative; background: linear-gradient(135deg, var(--glass-a), var(--glass-b)); -webkit-backdrop-filter: blur(24px) saturate(150%); backdrop-filter: blur(24px) saturate(150%); border: 1px solid var(--line); border-radius: 24px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .17), 0 24px 60px rgba(0, 0, 0, .36); }
+.sphere { position: absolute; border-radius: 50%; pointer-events: none; background: radial-gradient(circle at 33% 27%, #ffe88a 0, var(--amber) 20%, #ff7d0c 50%, var(--orange) 68%, #b83200 100%); box-shadow: inset -18px -24px 60px rgba(110, 25, 0, .55), 0 40px 120px rgba(255, 88, 0, .3); }
+
+/* Navigation */
+.nav-shell { position: sticky; top: 0; z-index: 20; padding: 14px var(--gutter-r) 8px var(--gutter-l); background: linear-gradient(to bottom, var(--ink) 70%, transparent); }
+.nav { max-width: 1180px; margin-inline: auto; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 10px 16px; border-radius: 20px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; font: 800 18px/1 var(--display); font-stretch: 125%; text-decoration: none; }
+.mark { width: 32px; height: 32px; flex: none; border-radius: 9px; background: var(--orange); color: #141414; display: grid; place-items: center; font: 900 19px/1 var(--display); }
+.nav a.back { font-size: 15px; font-weight: 500; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.nav a.back:hover { color: var(--paper); }
+
+/* Hero */
+.hero { padding-block: clamp(28px, 5vw, 56px) clamp(30px, 4vw, 48px); overflow-x: clip; }
+.hero-stage { position: relative; }
+.s1 { width: clamp(150px, 22vw, 280px); aspect-ratio: 1; right: -3%; top: -10%; }
+.s2 { width: clamp(70px, 9vw, 120px); aspect-ratio: 1; left: 38%; bottom: -9%; }
+.hero-panel { background: linear-gradient(135deg, rgba(26, 21, 18, .74), rgba(26, 21, 18, .44)); padding: clamp(28px, 5vw, 60px); border-radius: 32px; display: grid; gap: 18px; justify-items: start; }
+.lede { font-size: clamp(18px, 2vw, 21px); color: var(--soft); max-width: 36em; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { font: 600 14px/1 var(--body); padding: 9px 12px; border-radius: 99px; border: 1px solid var(--line); color: var(--soft); background: rgba(255, 255, 255, .04); }
+
+/* Start here */
+.start { padding-bottom: clamp(36px, 5vw, 64px); }
+.start-head { display: grid; gap: 10px; margin-bottom: 22px; max-width: 700px; }
+.routes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.route { padding: 24px; display: grid; gap: 10px; align-content: start; }
+.route p { color: var(--muted); font-size: 16px; }
+.route b.go { color: var(--orange-soft); font-weight: 700; }
+.route a { color: var(--paper); font-weight: 600; text-underline-offset: 3px; }
+
+/* Layout */
+.layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: clamp(28px, 4vw, 56px); align-items: start; padding-bottom: clamp(48px, 7vw, 90px); }
+.index { position: sticky; top: 92px; padding: 18px 16px; border-radius: 20px; }
+.index ol { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 2px; counter-reset: i; }
+.index li { counter-increment: i; }
+.index a { display: flex; gap: 9px; padding: 6px 8px; border-radius: 9px; font-size: 15px; line-height: 1.3; color: var(--muted); text-decoration: none; }
+.index a::before { content: counter(i); font-weight: 700; color: var(--orange-soft); min-width: 18px; font-variant-numeric: tabular-nums; }
+.index a:hover { background: rgba(255, 255, 255, .07); color: var(--paper); }
+.content { display: grid; gap: clamp(52px, 7vw, 84px); min-width: 0; }
+
+/* Steps */
+.step { display: grid; gap: 18px; min-width: 0; }
+.step-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; align-items: center; }
+.num { grid-row: span 2; font: 900 clamp(44px, 6vw, 62px)/1 var(--display); font-stretch: 125%; color: var(--orange); font-variant-numeric: tabular-nums; }
+.tag { justify-self: start; font: 700 12px/1 var(--body); padding: 6px 9px; border-radius: 8px; border: 1px solid var(--line); color: var(--muted); }
+.tag.pro { color: #ffc29f; border-color: rgba(255, 88, 0, .5); background: rgba(255, 88, 0, .12); }
+.step > p, .plain { color: var(--soft); max-width: 44em; }
+.todo { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; counter-reset: t; max-width: 46em; }
+.todo li { counter-increment: t; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; color: var(--soft); }
+.todo li::before { content: counter(t); width: 28px; height: 28px; border-radius: 9px; background: rgba(255, 88, 0, .16); border: 1px solid rgba(255, 88, 0, .4); color: #ffc29f; display: grid; place-items: center; font: 700 14px/1 var(--body); }
+.ui { font: 700 .86em/1.2 var(--body); padding: 2px 7px; border-radius: 6px; background: rgba(255, 255, 255, .1); color: var(--paper); white-space: nowrap; }
+.tip { padding: 18px 20px; border-radius: 18px; color: var(--soft); max-width: 46em; }
+.tip strong { color: var(--paper); }
+.warn { border-left: 3px solid var(--orange); }
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.compare > div { padding: 22px; display: grid; gap: 8px; align-content: start; }
+.compare p { color: var(--muted); font-size: 16px; }
+.compare .when { color: var(--soft); }
+.frame { padding: 10px; border-radius: 20px; }
+.frame img { border-radius: 12px; width: 100%; }
+.frame.narrow { max-width: 400px; }
+.shots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+@media (max-width: 640px) { .shots { grid-template-columns: minmax(0, 1fr); } }
+.caption { font-size: 14px; color: var(--muted); margin-top: -8px; }
+
+/* Meaning rows */
+.rows { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: minmax(150px, 190px) minmax(0, 1fr) minmax(0, 1fr); gap: 18px; padding: 15px 0; border-bottom: 1px solid var(--line); align-items: start; }
+.row.two { grid-template-columns: minmax(150px, 190px) minmax(0, 1fr); }
+.row.head { padding-block: 0 10px; font: 700 12px/1.2 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.row b { font-weight: 700; color: var(--paper); }
+.row span { font-size: 16px; color: var(--soft); }
+.row span.do { color: var(--muted); }
+
+.routine { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.routine > div { padding: 24px; display: grid; gap: 12px; align-content: start; }
+.routine ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.routine li { padding-left: 22px; position: relative; font-size: 16px; color: var(--soft); }
+.routine li::before { content: "✓"; position: absolute; left: 0; font-weight: 800; color: var(--orange-soft); }
+
+.faq { display: grid; gap: 10px; }
+.faq details { padding: 4px 20px; border-radius: 16px; background: var(--ink-2); border: 1px solid var(--line); }
+.faq summary { padding-block: 14px; cursor: pointer; font-weight: 600; }
+.faq details p { color: var(--muted); padding-bottom: 16px; max-width: 62ch; font-size: 16px; }
+
+.closing { padding: clamp(26px, 4vw, 44px); border-radius: 26px; display: grid; gap: 12px; }
+.closing p { color: var(--soft); }
+.select { user-select: all; color: var(--paper); font-weight: 600; }
+footer { border-top: 1px solid var(--line); padding-block: 30px 42px; color: var(--muted); font-size: 14px; }
+.foot { display: grid; gap: 12px; }
+.foot-links { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--paper); }
+.foot-links a { text-underline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media (max-width: 980px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .index { position: static; }
+  .index ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .routes, .compare, .routine { grid-template-columns: minmax(0, 1fr); }
+  .index ol { grid-template-columns: minmax(0, 1fr); }
+  .row, .row.two { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .row.head { display: none; }
+  .ui { white-space: normal; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  .s1 { right: -8%; top: -5%; width: 130px; }
+  .s2 { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="nav-shell">
+  <header class="nav glass">
+    <a class="brand" href="index.html"><span class="mark" aria-hidden="true">M</span>Mila.Desk</a>
+    <a class="back" href="index.html">← Home</a>
+  </header>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-stage">
+        <span class="sphere s1" aria-hidden="true"></span>
+        <span class="sphere s2" aria-hidden="true"></span>
+        <div class="hero-panel glass">
+          <span class="label">User guide</span>
+          <h1>Your first day with Mila.Desk, <em>step by step.</em></h1>
+          <p class="lede">What to install, what to tap first, what each result means and what to do about it. Follow the steps in order; each one builds on the last.</p>
+          <div class="facts">
+            <span class="fact">Google Chrome on desktop</span>
+            <span class="fact">Never asks for your Amazon password</span>
+            <span class="fact">Each feature says whether it's Free or Premium</span>
+            <span class="fact">The brands and products in the screenshots are examples</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="start" id="empezar">
+    <div class="wrap">
+      <div class="start-head">
+        <span class="label">Before you start</span>
+        <h2>Where do I start?</h2>
+      </div>
+      <div class="routes">
+        <div class="route glass">
+          <h3>I just installed it and already have brand chats</h3>
+          <p><b class="go">Start with Full analysis.</b> It reads all your conversations and builds your panel. Follow the guide from <a href="#instalar">step 1</a>.</p>
+        </div>
+        <div class="route glass">
+          <h3>I already ran my first analysis</h3>
+          <p><b class="go">Use Update conversations.</b> It only checks what's new, so it's faster. Go to your <a href="#rutina">daily routine</a>.</p>
+        </div>
+        <div class="route glass">
+          <h3>I'm new to Creator Connections and have no chats</h3>
+          <p><b class="go">Start with the Radar and Free Samples.</b> The analysis won't have anything to show yet. Create your account and jump to <a href="#radar">step 7</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap layout">
+    <nav class="index glass" aria-label="Guide steps">
+      <span class="label">In this guide</span>
+      <ol>
+        <li><a href="#instalar">Install</a></li>
+        <li><a href="#cuenta">Account and access</a></li>
+        <li><a href="#analisis">First analysis</a></li>
+        <li><a href="#resultados">Reading results</a></li>
+        <li><a href="#colaboraciones">Collaborations</a></li>
+        <li><a href="#mensajes">Quick messages</a></li>
+        <li><a href="#radar">Campaign Radar</a></li>
+        <li><a href="#marcas">Message brands</a></li>
+        <li><a href="#mis-videos">My videos' campaigns</a></li>
+        <li><a href="#video">Video Intelligence</a></li>
+        <li><a href="#samples">Free Samples</a></li>
+        <li><a href="#ventas">What sold?</a></li>
+        <li><a href="#rutina">Your routine</a></li>
+        <li><a href="#problemas">If something goes wrong</a></li>
+      </ol>
+    </nav>
+
+    <div class="content">
+      <article class="step" id="instalar">
+        <div class="step-head"><span class="num" aria-hidden="true">1</span><h2>Install the extension</h2></div>
+        <ol class="todo">
+          <li><span>In Google Chrome on your computer, open <a href="https://chromewebstore.google.com/detail/pgndgladpapgkejoldmncgeablnihjdk" target="_blank" rel="noopener">Mila.Desk on the Chrome Web Store</a>.</span></li>
+          <li><span>Click <span class="ui">Add to Chrome</span>, then <span class="ui">Add extension</span>.</span></li>
+          <li><span>Click the puzzle piece 🧩 next to the address bar, then the pin 📌 next to Mila.Desk. That keeps the icon always in view.</span></li>
+        </ol>
+      </article>
+
+      <article class="step" id="cuenta">
+        <div class="step-head"><span class="num" aria-hidden="true">2</span><h2>Create your account and activate your access</h2></div>
+        <ol class="todo">
+          <li><span>Click the Mila.Desk icon, then <span class="ui">⚙</span> and <span class="ui">No account? Sign up</span>. If it shows up in Spanish, choose <span class="ui">English</span> under <span class="ui">🌐 Idioma · Language</span>.</span></li>
+          <li><span>Enter your Creator Connections username, your email and a new password. <strong>Don't use your Amazon one.</strong></span></li>
+          <li><span>Open the confirmation email, confirm your account and go back to Mila.Desk to sign in. If it doesn't arrive, check your spam folder.</span></li>
+          <li><span>To activate Premium, go to the <span class="ui">⭐ Your access</span> section and choose the monthly or yearly plan: the first time you get 14 days free. If you got a code, enter it there and click <span class="ui">ACTIVATE</span>.</span></li>
+        </ol>
+        <div class="shots">
+          <div class="frame glass"><img src="../assets/en/guia-crear-cuenta.png" width="940" height="1280" alt="Form to create a Mila.Desk account: Creator Connections username, email and password." loading="lazy"></div>
+          <div class="frame glass"><img src="../assets/en/guia-activar-acceso.png" width="940" height="610" alt="Your access section, with the box to enter the code and the Activate button." loading="lazy"></div>
+        </div>
+        <p class="tip glass"><strong>You can start without Premium too.</strong> Everything marked Free works the same. Premium features show a lock 🔒.</p>
+      </article>
+
+      <article class="step" id="analisis">
+        <div class="step-head"><span class="num" aria-hidden="true">3</span><span class="tag">Free</span><h2>Run your first analysis</h2></div>
+        <p>This is the first thing to do if you already have conversations. Mila.Desk reads them with your Amazon session and tells you where each brand stands.</p>
+        <div class="compare">
+          <div class="glass">
+            <h3>Full analysis</h3>
+            <p>Checks all your conversations again, one by one.</p>
+            <p class="when"><strong>Use it</strong> the first time, or if a number doesn't add up.</p>
+          </div>
+          <div class="glass">
+            <h3>↻ Update conversations</h3>
+            <p>Checks only new conversations or ones with new messages.</p>
+            <p class="when"><strong>Use it</strong> every other day.</p>
+          </div>
+        </div>
+        <ol class="todo">
+          <li><span>In Mila.Desk, on the <span class="ui">① ANALYZE</span> tab, click <span class="ui">↗ GO TO CREATOR CONNECTIONS</span> and sign in to Amazon if asked.</span></li>
+          <li><span>With that Amazon tab in front, open Mila.Desk again and click <span class="ui">FULL ANALYSIS</span>.</span></li>
+          <li><span>Watch the progress bar. How long it takes depends on how many conversations you have. You can close the Mila.Desk window and reopen it to check how it's going.</span></li>
+          <li><span>When it's done, click <span class="ui">SEE RESULTS →</span>.</span></li>
+        </ol>
+        <div class="shots">
+          <div class="frame glass"><img src="../assets/en/guia-analizar.png" width="940" height="1800" alt="Analyze tab with the Update conversations and Full analysis buttons, and the last analysis summary." loading="lazy"></div>
+          <div class="frame glass"><img src="../assets/en/guia-progreso.png" width="940" height="1180" alt="Analysis in progress with the progress bar: 86 of 240 conversations." loading="lazy"></div>
+        </div>
+        <p class="tip glass warn"><strong>Important:</strong> the analysis only starts if the tab in front is an Amazon tab. While it runs, don't close or reload that tab.</p>
+      </article>
+
+      <article class="step" id="resultados">
+        <div class="step-head"><span class="num" aria-hidden="true">4</span><span class="tag">Free</span><h2>Understand your results</h2></div>
+        <p>On the <span class="ui">② RESULTS</span> tab you'll see your brands with a label. Always start with the <strong>To answer</strong> filter: those brands are waiting for you.</p>
+        <div class="rows">
+          <div class="row head"><span>Label</span><span>What it means</span><span>What to do</span></div>
+          <div class="row"><b>To answer</b><span>The brand sent the last message.</span><span class="do">Answer these first.</span></div>
+          <div class="row"><b>I replied</b><span>The brand has replied before, and the last message is yours.</span><span class="do">Wait for their reply.</span></div>
+          <div class="row"><b>No reply</b><span>The brand has never answered.</span><span class="do">Decide whether it's worth following up or moving on.</span></div>
+          <div class="row"><b>Replied</b><span>This filter gathers every brand that has ever answered you.</span><span class="do">Use it to see your active contacts.</span></div>
+        </div>
+        <div class="frame narrow glass"><img src="../assets/en/guia-resultados.png" width="940" height="1320" alt="Mila.Desk Results tab: conversations, to answer, replied and the brand list with buttons." loading="lazy"></div>
+        <p class="plain"><strong>How to read a row.</strong> Under the name you'll see something like “2 conversations · 8 messages · 3 from the brand”. A brand can have several conversations, and Mila.Desk groups them into one row.</p>
+        <p class="plain"><strong>Each row's buttons.</strong> <span class="ui">＋ COLLAB.</span> adds the brand to your collaborations. <span class="ui">OPEN</span> takes you straight to the chat (Premium). The search box finds a brand by name.</p>
+        <p class="plain"><strong>If “Need review” shows up</strong> in the summary, Mila.Desk couldn't classify that conversation. Check it yourself on Amazon. It never stores the text of your messages, only the brand, the counts and the dates.</p>
+      </article>
+
+      <article class="step" id="colaboraciones">
+        <div class="step-head"><span class="num" aria-hidden="true">5</span><span class="tag">Free list · Premium tracking</span><h2>Organize your collaborations</h2></div>
+        <p>When a brand is already working with you, add it with <span class="ui">＋ COLLAB.</span> You'll then find it on the <span class="ui">③ COLLABORATIONS</span> tab.</p>
+        <ol class="todo">
+          <li><span>Tap the <span class="ui">🔴 Need a reply</span> filter to see which of your collaborations are waiting for you.</span></li>
+          <li><span>With Premium, set each brand's stage: Pending, Product on its way, Product received, Content in progress, Content delivered or Finished.</span></li>
+          <li><span>With Premium, your accepted campaigns link to each brand, one per product. No more pasting links by hand.</span></li>
+        </ol>
+        <div class="frame narrow glass"><img src="../assets/en/guia-colaboraciones.png" width="940" height="1920" alt="Mila.Desk Collaborations tab with the brand list and stage filters." loading="lazy"></div>
+      </article>
+
+      <article class="step" id="mensajes">
+        <div class="step-head"><span class="num" aria-hidden="true">6</span><span class="tag pro">Premium</span><h2>Set up your quick messages</h2></div>
+        <p>Save your intro and your address once, and use them with one button inside the Amazon chat.</p>
+        <ol class="todo">
+          <li><span>Go to <span class="ui">⚙</span>, under <span class="ui">💬 Saved messages</span>, and click <span class="ui">＋ ADD MESSAGE</span>.</span></li>
+          <li><span>Write the text. Put <span class="ui">{brand}</span> wherever you want the chat's brand name to appear.</span></li>
+          <li><span>Choose how it works. With <span class="ui">✎</span> the text is typed in the box and you press Send. With <span class="ui">➤</span> it's sent right away. Your address can go out one line per message, so Amazon doesn't squash the lines together.</span></li>
+          <li><span>Open a chat in Creator Connections Messages. Your buttons show up above the text box.</span></li>
+        </ol>
+        <div class="shots">
+          <div class="frame glass"><img src="../assets/en/guia-mensajes.png" width="940" height="1280" alt="Saved messages section with a main message and an address." loading="lazy"></div>
+          <div class="frame glass"><img src="../assets/en/guia-mensajes-chat.png" width="657" height="236" alt="Amazon chat with the Mila.Desk buttons, Main message and Address, above the text box." loading="lazy"></div>
+        </div>
+        <p class="tip glass"><strong>Tip:</strong> keep “Ask for confirmation before sending” turned on. Before sending, Mila.Desk asks you. If Amazon warns about personal information, as with an address, and you confirm, it presses Continue for you. These messages are saved only in your browser.</p>
+      </article>
+
+      <article class="step" id="radar">
+        <div class="step-head"><span class="num" aria-hidden="true">7</span><span class="tag pro">Premium</span><h2>Pick campaigns with the Radar</h2></div>
+        <p>You don't have to tap anything. Go to the Creator Connections campaigns and you'll see the Radar on each card and inside the campaign detail.</p>
+        <div class="rows">
+          <div class="row head"><span>Signal</span><span>When it shows</span><span>What to do</span></div>
+          <div class="row"><b>Spots open</b><span>None of the signals below.</span><span class="do">Take your time.</span></div>
+          <div class="row"><b>Filling up</b><span>50% of spots taken, 7 days or less to close, or 30% of budget or less.</span><span class="do">Decide soon if you're interested.</span></div>
+          <div class="row"><b>Last chance</b><span>80% of spots taken, 3 days or less to close, or 10% of budget or less.</span><span class="do">If it suits you, accept it today.</span></div>
+          <div class="row"><b>Closed</b><span>No spots left, no budget left, or the campaign ended.</span><span class="do">Look for another one.</span></div>
+        </div>
+        <div class="frame glass"><img src="../assets/en/guia-radar-tarjetas.png" width="1150" height="562" alt="Campaign cards in Creator Connections with the Radar strip: signal, spots bar and spots left." loading="lazy"></div>
+        <div class="frame glass"><img src="../assets/en/guia-radar-detalle.png" width="1150" height="410" alt="Mila.Desk Radar block on a campaign detail page: accepted creators, closing date, budget and commission." loading="lazy"></div>
+        <p class="plain"><strong>What to look at in the detail:</strong> how many spots are left, why it's flagged, the closing date, the remaining budget, the commission and whether the brand sends samples. Some campaigns don't show their spots; in that case, go by the date and the budget.</p>
+        <div class="rows">
+          <div class="row two"><b>⭐ Follow campaign</b><span>The campaign shows up in <span class="ui">⑤ TO-DO</span> with its spots left, so you accept it in time.</span></div>
+          <div class="row two"><b>📌 Follow up with this brand</b><span>The brand goes to the Follow up list in <a href="#marcas">Message brands</a>, so you can write again if it doesn't reply.</span></div>
+        </div>
+      </article>
+
+      <article class="step" id="marcas">
+        <div class="step-head"><span class="num" aria-hidden="true">8</span><span class="tag pro">Premium</span><h2>Write to many brands with Message brands</h2></div>
+        <p>Open Mila.Desk and click <span class="ui">📨 MESSAGE BRANDS</span>. A page opens with four steps.</p>
+        <ol class="todo">
+          <li><span><strong>Choose the brands.</strong> Pick a category (or type a brand name) and click <span class="ui">FIND BRANDS</span>. You get 100 brands with open campaigns, sorted by commission. <span class="ui">Load 100 more brands</span> shows more.</span></li>
+          <li><span><strong>Write your message.</strong> Each block arrives as a separate message. With the <span class="ui">Brand</span>, <span class="ui">Campaign</span>, <span class="ui">Product link</span> and <span class="ui">Commission</span> buttons, each brand gets its own details.</span></li>
+          <li><span><strong>Review and send.</strong> Check the preview and click <span class="ui">SEND</span>. It goes to one brand at a time, with a pause, and you can stop it anytime.</span></li>
+        </ol>
+        <div class="frame glass"><img src="../assets/en/guia-mensajes-marcas.png" width="1100" height="720" alt="Message brands page with sample brands: campaign, commission, whether you already talked to each one and the 📌 follow-up button." loading="lazy"></div>
+        <div class="rows">
+          <div class="row two"><b>🟢 New</b><span>You've never talked to that brand. Only these are ticked by default.</span></div>
+          <div class="row two"><b>🟡 You wrote</b><span>You already wrote from this page or in your chats. It says when you can write again.</span></div>
+          <div class="row two"><b>🔵 Already replied / In collaborations</b><span>You already talk to that brand: write from its chat.</span></div>
+        </div>
+        <p class="plain"><strong>📌 Follow up with brands that don't reply</strong></p>
+        <p>Click 📌 on a brand (or <span class="ui">📌 Follow up with this brand</span> in the Radar) and it goes to step 4 of the page. <span class="ui">↻ CHECK REPLIES</span> checks on Amazon whether they answered. You can tick the ones that are ready and send them your short message with <span class="ui">✉ FOLLOW UP</span>.</p>
+        <div class="frame glass"><img src="../assets/en/guia-insistir.png" width="1100" height="620" alt="Follow up list with sample brands: one ready for a follow-up, one that can get a message in a few days and one that already replied." loading="lazy"></div>
+        <p class="tip glass"><strong>Once a week:</strong> each brand can be written to only once a week from Mila.Desk, so Amazon doesn't see it as repeated messages. Nothing is sent without your click. By sending, you accept Creator Connections' communication rules.</p>
+      </article>
+
+      <article class="step" id="mis-videos">
+        <div class="step-head"><span class="num" aria-hidden="true">9</span><span class="tag pro">Premium</span><h2>Accept campaigns and send your videos</h2></div>
+        <p>Open Mila.Desk and click <span class="ui">🎬 MY VIDEOS' CAMPAIGNS</span>. Then click <span class="ui">FIND CAMPAIGNS</span>: Mila.Desk checks the products in your videos one by one, with a pause.</p>
+        <ol class="todo">
+          <li><span><strong>Open campaigns:</strong> tick the ones you want and click <span class="ui">Accept</span>. Only the ones you tick are accepted.</span></li>
+          <li><span><strong>Accepted campaigns with no video sent:</strong> the campaigns you already accepted that have no content, when you have a video of the same product or a variant. Each one shows the video and the link that will be sent.</span></li>
+          <li><span>Tick the ones you want and click <span class="ui">📤 SEND VIDEOS</span>. If you tick <span class="ui">Let the brand know</span>, each brand gets your message after the video is sent.</span></li>
+        </ol>
+        <div class="frame glass"><img src="../assets/en/guia-enviar-video.png" width="1100" height="560" alt="List of accepted campaigns with no video sent, with each video and link, the optional note to the brand and the Send button." loading="lazy"></div>
+        <p class="plain">Campaigns you already sent a video to show “✅ Video sent” and are never sent again. In the popup's <span class="ui">⑤ TO-DO</span> you also see your accepted campaigns still missing content and the days they have left.</p>
+      </article>
+
+      <article class="step" id="video">
+        <div class="step-head"><span class="num" aria-hidden="true">10</span><span class="tag pro">Premium</span><h2>Check your videos with Video Intelligence</h2></div>
+        <p>It shows up on its own too. Go to Manage videos, your Storefront or a product page on Amazon, and look at the Mila.Desk panel.</p>
+        <div class="frame glass"><img src="../assets/en/guia-video.png" width="1206" height="189" alt="Video Intelligence panel for a video, with carousel position, estimated commission, monthly purchases and price." loading="lazy"></div>
+        <div class="rows">
+          <div class="row two"><b>Video position</b><span>Where your video shows up in the product's gallery or carousel.</span></div>
+          <div class="row two"><b>Estimated commission</b><span>What that product could earn you. It's an estimate, not a confirmed payment.</span></div>
+          <div class="row two"><b>Monthly purchases</b><span>How much the product is being bought, according to what Amazon shows.</span></div>
+          <div class="row two"><b>Price</b><span>The current price and the prices your browser has seen in the last 30 days.</span></div>
+          <div class="row two"><b>Estimated monthly revenue</b><span>A rough calculation from the product's price and monthly purchases.</span></div>
+          <div class="row two"><b>Campaigns</b><span>“Active · delivering” or “Joined · not delivering yet”. “Possible brand campaign” means it still needs confirming, so check it with <span class="ui">See campaign ↗</span>.</span></div>
+        </div>
+        <p class="tip glass"><strong>How to use it:</strong> before recording, open the product and compare purchases, commission and campaigns. If a panel says “Checking…”, wait a few seconds. The first time takes a little longer.</p>
+      </article>
+
+      <article class="step" id="samples">
+        <div class="step-head"><span class="num" aria-hidden="true">11</span><span class="tag pro">Premium</span><h2>Find brands with Free Samples</h2></div>
+        <p>It's a shared list of brands that send free samples. Each brand is approved after its proof is reviewed.</p>
+        <ol class="todo">
+          <li><span>Open the <span class="ui">④ FREE SAMPLES</span> tab and search by name, or filter by category.</span></li>
+          <li><span>Click <span class="ui">↗ SEE CAMPAIGNS</span> to open that brand's campaigns in Creator Connections.</span></li>
+          <li><span>Did a brand send you a sample? Click <span class="ui">＋ ADD BRAND</span> and paste a screenshot that proves it. You can also report it from the Radar. It'll show up in the list once approved.</span></li>
+        </ol>
+        <div class="frame narrow glass"><img src="../assets/en/guia-free-samples.png" width="940" height="1280" alt="Free Samples tab with the search box, the Add brand button and the brand list." loading="lazy"></div>
+        <p class="plain">These brands' campaigns show up in the Radar with “Sample ✓”.</p>
+      </article>
+
+      <article class="step" id="ventas">
+        <div class="step-head"><span class="num" aria-hidden="true">12</span><span class="tag pro">Premium</span><h2>Find out what sold</h2></div>
+        <p>When there are only a few sales, Amazon doesn't tell you which product sold. Mila.Desk works it out from each day's totals and the price and commission of the products it already knows.</p>
+        <ol class="todo">
+          <li><span>Open your reports in Amazon Associates, on the <span class="ui">Commissions</span> tab, and let the table by date show up.</span></li>
+          <li><span>Click the <span class="ui">📊 What sold? · Mila.Desk</span> button on that page. It opens in a new tab.</span></li>
+          <li><span>Read each day's label using the table below.</span></li>
+        </ol>
+        <div class="rows">
+          <div class="row two"><b>🟢 Certain</b><span>Only one of the products Mila.Desk knows fits.</span></div>
+          <div class="row two"><b>🟡 Likely</b><span>Several combinations are possible, or only part of the data matches.</span></div>
+        </div>
+        <p>Days when Mila.Desk can't identify the product don't show up in the list.</p>
+        <div class="frame narrow glass"><img src="../assets/en/guia-ventas.png" width="940" height="1340" alt="“What sold?” with one day marked Certain and another Likely." loading="lazy"></div>
+        <p class="tip glass"><strong>Keep in mind:</strong> it's an estimate, not Amazon data. A sale of a product Mila.Desk doesn't know can't be detected. The more products you view with Video Intelligence, the more it has to compare against. This data has a private copy in your account.</p>
+      </article>
+
+      <article class="step" id="rutina">
+        <div class="step-head"><span class="num" aria-hidden="true">13</span><h2>Your Mila.Desk routine</h2></div>
+        <div class="routine">
+          <div class="glass">
+            <h3>Every day</h3>
+            <ul>
+              <li>Open Amazon and click <span class="ui">↻ UPDATE CONVERSATIONS</span>.</li>
+              <li>Answer the <strong>To answer</strong> filter.</li>
+              <li>Look at campaigns flagged <strong>Last chance</strong>.</li>
+              <li>Check <span class="ui">⑤ TO-DO</span>: campaigns missing content and campaigns you follow.</li>
+            </ul>
+          </div>
+          <div class="glass">
+            <h3>Every week</h3>
+            <ul>
+              <li>Update your collaborations' stages.</li>
+              <li>Look for new brands in Free Samples and in Message brands.</li>
+              <li>Click <span class="ui">↻ CHECK REPLIES</span> in 📌 Follow up.</li>
+              <li>Send your new videos to your accepted campaigns.</li>
+              <li>Check <strong>What sold?</strong> and your videos.</li>
+              <li>Save a copy with <span class="ui">↓ EXPORT BACKUP</span>.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="step" id="problemas">
+        <div class="step-head"><span class="num" aria-hidden="true">14</span><h2>If something goes wrong</h2></div>
+        <div class="faq">
+          <details><summary>It says “The active tab isn't Amazon”</summary><p>Bring an Amazon tab to the front, open Mila.Desk and tap the analysis button again.</p></details>
+          <details><summary>It says “An analysis is already running”</summary><p>Wait for it to finish. If you closed the Amazon tab while it was running, try again after about 5 minutes.</p></details>
+          <details><summary>The analysis stops or shows a session error</summary><p>Check that you're still signed in to Amazon and to Mila.Desk, reload the Amazon page and try again.</p></details>
+          <details><summary>I don't see the Radar, the video panel or my message buttons</summary><p>Reload the Amazon page. Also check that your Premium access is active in Settings, under “⭐ Your access”.</p></details>
+          <details><summary>I forgot my Mila.Desk password</summary><p>On the sign-in screen, tap “Forgot your password?” and enter your email. It's a separate password from your Amazon one.</p></details>
+          <details><summary>Does Mila.Desk send messages without me knowing?</summary><p>No. A message is only typed or sent when you press its button. In Message brands, each brand is also written to at most once a week.</p></details>
+          <details><summary>Amazon held a message</summary><p>Amazon sometimes holds messages with personal details, like an address. Mila.Desk lets you know and stops if it happens several times in a row. Remove those details from the message and try again another day.</p></details>
+          <details><summary>I changed computers: do I lose my messages?</summary><p>No. Your quick messages, your templates, the 📌 list and which brands you wrote to have a copy in your account. Sign in and open Mila.Desk: they come back by themselves.</p></details>
+          <details><summary>I want to change the colors or delete my account</summary><p>Both are in Settings (⚙). If you delete your account, export a backup first: it can't be undone.</p></details>
+        </div>
+        <div class="closing glass">
+          <h3>Still have questions or an idea?</h3>
+          <p>Use Settings → 💬 Suggestions and bugs, or email us with a screenshot. Your feedback helps us improve Mila.Desk.</p>
+          <p class="select">milanes@mila-desk.com</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div class="foot-links">
+      <a href="index.html">Home page</a>
+      <a href="privacidad.html">Privacy policy</a>
+      <a href="terminos.html">Terms of service</a>
+      <a href="reembolsos.html">Refund policy</a>
+      <a href="../guia.html" lang="es" hreflang="es">Español</a>
+    </div>
+    <p>Mila.Desk is an independent tool, not affiliated with, sponsored by or endorsed by Amazon. Amazon and Creator Connections are trademarks of Amazon.com, Inc. or its affiliates.</p>
+  </div>
+</footer>
+</body>
+</html>
