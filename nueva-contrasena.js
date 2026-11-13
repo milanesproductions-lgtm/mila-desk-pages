@@ -7,6 +7,9 @@
   const MIN_LENGTH = 8;
   const VIEWS = ["viewChecking", "viewForm", "viewInvalid", "viewDone"];
 
+  // The same script serves /nueva-contrasena.html and the English page /en/.
+  const EN = document.documentElement?.lang === "en";
+  const T = (es, en) => (EN ? en : es);
   const $ = (id) => document.getElementById(id);
   const show = (view) => VIEWS.forEach((id) => { $(id).hidden = id !== view; });
   const say = (text) => { $("formStatus").textContent = text; };
@@ -25,10 +28,10 @@
   });
 
   function errorText(status, code) {
-    if (code === "same_password") return "Esa ya es tu contraseña. Escribe una diferente.";
-    if (code === "weak_password") return "Esa contraseña es muy débil. Prueba con una más larga y difícil de adivinar.";
-    if (status === 429) return "Demasiados intentos. Espera un momento y vuelve a probar.";
-    return "No se pudo cambiar la contraseña. Inténtalo de nuevo.";
+    if (code === "same_password") return T("Esa ya es tu contraseña. Escribe una diferente.", "That's already your password. Enter a different one.");
+    if (code === "weak_password") return T("Esa contraseña es muy débil. Prueba con una más larga y difícil de adivinar.", "That password is too weak. Try a longer one that's harder to guess.");
+    if (status === 429) return T("Demasiados intentos. Espera un momento y vuelve a probar.", "Too many attempts. Wait a moment and try again.");
+    return T("No se pudo cambiar la contraseña. Inténtalo de nuevo.", "Couldn't change the password. Try again.");
   }
 
   // Ends the recovery session and any other open one. The password is already
@@ -40,8 +43,8 @@
   async function submit(event) {
     event.preventDefault();
     const password = $("newPassword").value;
-    if (password.length < MIN_LENGTH) return say(`Usa al menos ${MIN_LENGTH} caracteres.`);
-    if (password !== $("confirmPassword").value) return say("Las dos contraseñas no coinciden.");
+    if (password.length < MIN_LENGTH) return say(T(`Usa al menos ${MIN_LENGTH} caracteres.`, `Use at least ${MIN_LENGTH} characters.`));
+    if (password !== $("confirmPassword").value) return say(T("Las dos contraseñas no coinciden.", "The two passwords don't match."));
 
     say("");
     $("savePassword").disabled = true;
@@ -67,7 +70,7 @@
       const payload = await response.json().catch(() => ({}));
       say(errorText(response.status, payload.error_code || payload.code));
     } catch {
-      say("No se pudo conectar. Comprueba tu conexión e inténtalo de nuevo.");
+      say(T("No se pudo conectar. Comprueba tu conexión e inténtalo de nuevo.", "Couldn't connect. Check your connection and try again."));
     } finally {
       $("savePassword").disabled = false;
     }
