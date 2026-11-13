@@ -41,8 +41,9 @@
 // Paddle approved the account on 2026-11-10. "#…&env=sandbox" uses the test account
 // instead (no real money); a sandbox payment only gives Premium while the webhook's
 // BILLING_ALLOW_TEST_MODE setting is "true", which stays off in production.
-// launch: discount applied by itself during the launch (owner's decision, 2026-11-10):
-// monthly 5 USD off the first 3 charges (10 USD), yearly 21 USD off the first year (99 USD).
+// launch: discount applied by itself during the launch (owner's decision, 2026-11-10; new prices
+// 2026-11-13, same IDs edited in Paddle live): monthly 20 USD with 5 USD off the first 3 charges
+// (15 USD), yearly 180 USD with 20 USD off the first year (160 USD). Sandbox keeps the old amounts.
 // Empty = no automatic discount. A creator code typed at checkout replaces it (Paddle
 // takes one discount per checkout).
 const ACCOUNTS = {
@@ -72,7 +73,7 @@ const TEXT = EN ? {
   closed: "Checkout closed", closedText: "You can open it again whenever you want.",
   bad: "This payment link isn't valid", badText: "Open the payment from Mila.Desk: Settings → Your access.",
   fail: "Checkout couldn't load", failText: "Check your connection and try again, or write to us at milanes@mila-desk.com.",
-  legal: 'Paddle.com is the Merchant of Record for all our orders. <a href="en/terminos.html">Terms</a> · <a href="en/reembolsos.html">Refunds</a> · <a href="privacidad.html">Privacy</a>'
+  legal: 'Paddle.com is the Merchant of Record for all our orders. <a href="en/terminos.html">Terms</a> · <a href="en/reembolsos.html">Refunds</a> · <a href="en/privacidad.html">Privacy</a>'
 } : {
   opening: "Abriendo el pago seguro…", by: "El pago lo procesa Paddle, nuestro proveedor de pagos.",
   open: "Abrir el pago", done: "Pago completado", doneText: "Vuelve a abrir Mila.Desk: tu acceso Premium se activa solo en unos segundos.",
