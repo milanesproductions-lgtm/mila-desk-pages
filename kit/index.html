@@ -1,0 +1,61 @@
+<!doctype html>
+<!-- Mila.Desk. Copyright (c) 2026 Jhoun Milanes (Milanes Production). All rights reserved. See LICENSE.txt. MD-ORIGIN-7F3A91C2 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e0c0b">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src https://sbbcjnsyljjdljoihack.supabase.co; img-src 'self' https://m.media-amazon.com; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/png" sizes="128x128" href="../assets/icono.png">
+<title>Media kit · Mila.Desk</title>
+<style>
+:root{--b:#0e0c0b;--b2:#171412;--b3:#1f1b18;--w:#fbf7f3;--m:#a89f97;--l:#2c2622;--o:#ff6a1a;--o-soft:rgba(255,106,26,.13);--o-text:#ffb38a;--on:#1a0b02}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--b);color:var(--w);font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:36px 16px 56px}
+[hidden]{display:none!important}
+.card{background:var(--b2);border:1px solid var(--l);border-radius:18px;padding:22px;margin-bottom:16px}
+.hero{display:flex;gap:16px;align-items:center}
+.avatar{flex:none;width:76px;height:76px;border-radius:50%;background:var(--o);color:var(--on);display:grid;place-items:center;font-size:30px;font-weight:900;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+h1{margin:0;font-size:28px;line-height:1.15;letter-spacing:-.5px;overflow-wrap:anywhere}
+.tagline{color:var(--m);margin:6px 0 0}
+.topics{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.topics span{background:var(--o-soft);color:var(--o-text);border-radius:999px;padding:4px 11px;font-size:13px;font-weight:700}
+h2{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--m)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:var(--b3);border:1px solid var(--l);border-radius:13px;padding:12px 14px}.stat b{display:block;font-size:24px;color:var(--o-text)}.stat span{color:var(--m);font-size:13px}
+.note{color:var(--m);font-size:12.5px;margin-top:10px}
+.links{display:grid;gap:8px}
+.links a{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--b3);border:1px solid var(--l);border-radius:12px;padding:12px 14px;color:var(--w);text-decoration:none;font-weight:700}
+.links a:hover{border-color:var(--o)}.links small{color:var(--m);font-weight:600}
+.videos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}@media (max-width:560px){.videos{grid-template-columns:repeat(2,1fr)}}
+.videos a{display:block;color:var(--w);text-decoration:none;background:var(--b3);border:1px solid var(--l);border-radius:12px;overflow:hidden}
+.videos img{display:block;width:100%;aspect-ratio:9/16;object-fit:cover;background:var(--b3)}
+.videos div{padding:8px 10px;font-size:12.5px;line-height:1.35}.videos small{display:block;color:var(--m);margin-top:3px}
+.rates{white-space:pre-wrap}
+.btn{display:inline-block;background:var(--o);color:var(--on);font-weight:900;text-decoration:none;border-radius:12px;padding:12px 18px}
+.contact a{color:var(--o-text);font-weight:800;text-decoration:none}
+.empty{text-align:center;color:var(--m);padding:60px 10px}
+footer{text-align:center;color:var(--m);font-size:12px;margin-top:22px}footer a{color:var(--m)}
+</style>
+</head>
+<body>
+<main>
+  <div id="preview" class="card" hidden style="border-color:var(--o);color:var(--o-text);font-weight:700"></div>
+  <div id="empty" class="empty">…</div>
+  <div id="kit" hidden>
+    <section class="card"><div class="hero"><div class="avatar" id="avatar"></div><div><h1 id="name"></h1><p class="tagline" id="tagline"></p></div></div><div class="topics" id="topics"></div></section>
+    <section class="card" id="statsCard" hidden><h2 data-t="stats"></h2><div class="stats" id="stats"></div><div class="note" id="statsNote"></div></section>
+    <section class="card" id="videosCard" hidden><h2 data-t="videos"></h2><div class="videos" id="videos"></div></section>
+    <section class="card" id="linksCard" hidden><h2 data-t="links"></h2><div class="links" id="links"></div></section>
+    <section class="card" id="proofCard" hidden><h2 data-t="proof"></h2><div id="proof"></div></section>
+    <section class="card" id="ratesCard" hidden><h2 data-t="rates"></h2><div class="rates" id="rates"></div></section>
+    <section class="card contact" id="contactCard" hidden><h2 data-t="contact"></h2><div id="contact"></div></section>
+    <section class="card" id="addressCard" hidden><h2 data-t="address"></h2><div id="address" class="rates"></div></section>
+  </div>
+  <footer><span data-t="made"></span> <a href="https://mila-desk.com/" rel="noopener">Mila.Desk</a> · <span data-t="independent"></span></footer>
+</main>
+<script src="kit.js"></script>
+</body>
+</html>
