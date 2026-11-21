@@ -49,6 +49,10 @@
 // mentorTrial: the 30-day trial price for a mentor's student who entered a code that asks
 // for a card (owner's decision, 2026-11-19); used only when trial=1 and checkout_offer() says
 // "mentoria". Empty = she gets the normal 14-day trial price.
+// influencer / influencerTrial: the same for someone whose first code came from an influencer
+// (checkout_offer() says "influencer"; owner's decision, 2026-11-21): 20-day trial price and
+// 3 USD off the first monthly charge (17 USD). The discount covers both monthly prices.
+// On the annual plan, influencer is 15 USD off the first year (180 → 165).
 // Empty = no automatic discount. A creator code typed at checkout replaces it (Paddle
 // takes one discount per checkout).
 const ACCOUNTS = {
@@ -56,16 +60,16 @@ const ACCOUNTS = {
     environment: "production",
     token: "live_7dc23360a16139f31621a260c44",
     prices: {
-      monthly: { normal: "pri_01m731brqgkbgyhd65z50benht", trial: "pri_01m732dyjm6vdabkf5d833azv9", launch: "", mentoria: "dsc_01m7ceebmr0j56j6db5tp0ajas", mentorTrial: "pri_01m7tb5kyzxbsxdbth7w24x92c" },
-      annual:  { normal: "pri_01m731c1bwrhzv99gy3y123tm3", trial: "pri_01m732errrq9wg2q4tmesbnbgm", launch: "" }
+      monthly: { normal: "pri_01m731brqgkbgyhd65z50benht", trial: "pri_01m732dyjm6vdabkf5d833azv9", launch: "", mentoria: "dsc_01m7ceebmr0j56j6db5tp0ajas", mentorTrial: "pri_01m7tb5kyzxbsxdbth7w24x92c", influencer: "dsc_01m7y8fxs5ytvkkd91h0kee2pn", influencerTrial: "pri_01m7y8dp4wcymae3ag1vbewb3f" },
+      annual:  { normal: "pri_01m731c1bwrhzv99gy3y123tm3", trial: "pri_01m732errrq9wg2q4tmesbnbgm", launch: "", influencer: "dsc_01m7y91vrwmjm7a0qb4fy2j148" }
     }
   },
   sandbox: {
     environment: "sandbox",
     token: "test_fdb413dfbfa4f32941c57eb6745",
     prices: {
-      monthly: { normal: "pri_01m72yz1ckb9bybk8kkvxehne9", trial: "pri_01m732fxafafj0bsrnvn7farzr", launch: "dsc_01m737nbw887h1yqd5nke5wx9p", mentoria: "dsc_01m7tbacgbwteq4w11dnyj66wm", mentorTrial: "pri_01m7tb7y7tzbpeenepfj4sb7dj" },
-      annual:  { normal: "pri_01m72yzftx9psh0brcc0g1ks3c", trial: "pri_01m732ghtg7pdm8dpp9exvtkpn", launch: "dsc_01m737qrzvx4d2m3k8nvsa7dm5" }
+      monthly: { normal: "pri_01m72yz1ckb9bybk8kkvxehne9", trial: "pri_01m732fxafafj0bsrnvn7farzr", launch: "dsc_01m737nbw887h1yqd5nke5wx9p", mentoria: "dsc_01m7tbacgbwteq4w11dnyj66wm", mentorTrial: "pri_01m7tb7y7tzbpeenepfj4sb7dj", influencer: "dsc_01m7y89qyyyjr2h5911m4vxvac", influencerTrial: "pri_01m7y880srs8k8jdx9qfhx0x4v" },
+      annual:  { normal: "pri_01m72yzftx9psh0brcc0g1ks3c", trial: "pri_01m732ghtg7pdm8dpp9exvtkpn", launch: "dsc_01m737qrzvx4d2m3k8nvsa7dm5", influencer: "dsc_01m7y8ytwtbj3rwetsjm198v1r" }
     }
   }
 };
@@ -121,7 +125,7 @@ if (!validUid || !priceId || !PADDLE.token) {
   script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
   script.onload = async () => {
     const mentoria = PADDLE.prices[plan] && PADDLE.prices[plan].mentoria;
-    if (mentoria) {
+    if (mentoria || (PADDLE.prices[plan] && PADDLE.prices[plan].influencer)) {
       try {
         const res = await fetch("https://sbbcjnsyljjdljoihack.supabase.co/rest/v1/rpc/checkout_offer", {
           method: "POST",
@@ -129,9 +133,13 @@ if (!validUid || !priceId || !PADDLE.token) {
           body: JSON.stringify({ p_user_id: uid }),
           signal: AbortSignal.timeout(5000)
         });
-        if (res.ok && (await res.json()) === "mentoria") {
+        const offer = res.ok ? await res.json() : null;
+        if (offer === "mentoria" && mentoria) {
           discountId = mentoria;
           if (trial && PADDLE.prices[plan].mentorTrial) priceId = PADDLE.prices[plan].mentorTrial;
+        } else if (offer === "influencer" && PADDLE.prices[plan].influencer) {
+          discountId = PADDLE.prices[plan].influencer;
+          if (trial && PADDLE.prices[plan].influencerTrial) priceId = PADDLE.prices[plan].influencerTrial;
         }
       } catch { /* the general launch discount stays */ }
     }
