@@ -155,6 +155,23 @@ h1 em { font-style: normal; color: var(--orange); }
 .plan li { padding-left: 24px; position: relative; font-size: 16px; }
 .plan li::before { content: "✓"; position: absolute; left: 0; font-weight: 800; color: var(--orange-soft); }
 .plan.pro { border-color: rgba(255, 138, 76, .55); }
+/* Pricing (owner's choice 2026-11-21, option A): monthly / annual switch over two cards. */
+.billing { display: inline-flex; gap: 4px; padding: 5px; margin-bottom: 26px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255, 255, 255, .04); position: relative; z-index: 1; }
+.billing button { border: 0; border-radius: 10px; background: none; color: var(--muted); font: 700 15px/1 var(--body); padding: 12px 18px; cursor: pointer; }
+.billing button[aria-pressed="true"] { background: var(--paper); color: var(--ink); }
+.billing .save { margin-left: 6px; font-size: 12px; color: #140a04; background: var(--amber); padding: 4px 7px; border-radius: 6px; }
+.plan .for { color: var(--muted); font-size: 15px; margin-top: -8px; }
+.plan .ribbon { margin-left: 10px; vertical-align: middle; white-space: nowrap; font: 800 11px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: #140a04; background: var(--orange); padding: 6px 9px; border-radius: 7px; }
+.amount { display: flex; align-items: baseline; gap: 8px; }
+.amount b { font: 900 58px/1 var(--display); font-stretch: 125%; letter-spacing: -.02em; }
+.amount span { color: var(--muted); font-weight: 600; }
+.plan .under { color: var(--muted); font-size: 14px; margin-top: -6px; }
+.plan .under strong { color: var(--amber); }
+.chip { justify-self: start; font: 700 13px/1 var(--body); padding: 8px 11px; border-radius: 9px; border: 1px solid var(--line); background: rgba(255, 255, 255, .04); color: var(--muted); }
+.chip.gift { color: #ffc29f; border-color: rgba(255, 88, 0, .5); background: rgba(255, 88, 0, .12); }
+.plan hr { border: 0; border-top: 1px solid var(--line); margin: 0; width: 100%; }
+.plan li.plus { padding-left: 0; font-weight: 700; }
+.plan li.plus::before { content: none; }
 
 /* News and roadmap */
 .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 64px); }
@@ -447,27 +464,37 @@ footer { position: relative; z-index: 1; border-top: 1px solid var(--line); padd
         <h2>Empieza gratis. Pasa a Premium cuando lo necesites.</h2>
         <p>Premium tiene 14 días gratis la primera vez. Cancelas cuando quieras.</p>
       </div>
+      <div class="billing" role="group" aria-label="Forma de pago"><button type="button" data-billing="m" aria-pressed="true">Mensual</button><button type="button" data-billing="y" aria-pressed="false">Anual <span class="save">Ahorra 60 USD</span></button></div>
       <div class="plans">
         <div class="plan glass">
           <h3>Gratis</h3>
-          <p class="price">Para tener tus marcas en orden</p>
+          <p class="for">Para tener tus marcas en orden</p>
+          <div class="amount"><b>0</b><span>USD</span></div>
+          <p class="under">Para siempre</p>
+          <span class="chip">Sin tarjeta</span>
+          <a class="btn ghost" href="https://chromewebstore.google.com/detail/pgndgladpapgkejoldmncgeablnihjdk" target="_blank" rel="noopener">Instalar gratis</a>
+          <hr>
           <ul>
             <li>Análisis de conversaciones</li>
             <li>Resultados y filtros</li>
-            <li>Lista de marcas en Colaboraciones</li>
+            <li>Colaboraciones: lista de marcas y sus etapas</li>
           </ul>
         </div>
         <div class="plan pro glass">
-          <h3>Premium</h3>
-          <p class="price">20 USD al mes o 180 USD al año. La primera vez tienes 14 días gratis.</p>
+          <h3>Premium<span class="ribbon">Recomendado</span></h3>
+          <p class="for">Para encontrar campañas y trabajar más rápido</p>
+          <div class="amount"><b id="proAmount">20</b><span>USD al mes</span></div>
+          <p class="under" id="proNote" data-m="Se cobra cada mes. Cancelas cuando quieras." data-y="<strong>180 USD al año</strong>, en un solo pago. Ahorras 60 USD.">Se cobra cada mes. Cancelas cuando quieras.</p>
+          <span class="chip gift">🎁 14 días gratis la primera vez</span>
+          <a class="btn primary" href="https://chromewebstore.google.com/detail/pgndgladpapgkejoldmncgeablnihjdk" target="_blank" rel="noopener">Probar 14 días gratis</a>
+          <hr>
           <ul>
-            <li>Todo lo del plan Gratis</li>
+            <li class="plus">Todo lo de Gratis, y además:</li>
             <li>Radar de campañas</li>
             <li>Video Intelligence</li>
             <li>Free Samples</li>
-            <li>Abrir chats con un clic</li>
-            <li>Mensajes rápidos</li>
-            <li>Etapas y campañas de cada colaboración</li>
+            <li>Abrir chats con un clic y mensajes rápidos</li>
+            <li>Campañas enlazadas a cada colaboración</li>
             <li>Mensajes a marcas y 📌 Insistir</li>
             <li>Campañas de mis videos: aceptar y enviar videos</li>
             <li>Pendientes y ¿Qué se vendió?</li>
@@ -550,6 +577,19 @@ footer { position: relative; z-index: 1; border-top: 1px solid var(--line); padd
   </div>
 </footer>
 
+<script>
+// Pricing: the monthly / annual switch (prices are the same as on pagar.html).
+(() => {
+  const box = document.querySelector('.billing'), amount = document.getElementById('proAmount'), note = document.getElementById('proNote');
+  if (!box) return;
+  box.addEventListener('click', e => {
+    const b = e.target.closest('[data-billing]'); if (!b) return;
+    for (const x of box.querySelectorAll('[data-billing]')) x.setAttribute('aria-pressed', String(x === b));
+    amount.textContent = b.dataset.billing === 'y' ? '15' : '20';
+    note.innerHTML = note.dataset[b.dataset.billing];
+  });
+})();
+</script>
 <script>
 // Spheres drift slightly with the pointer, on devices that have one.
 (() => {
