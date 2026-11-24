@@ -26,6 +26,7 @@
   <div class="logo">M</div>
   <h1 id="title">Abriendo el pago seguro…</h1>
   <p id="text">El pago lo procesa Paddle, nuestro proveedor de pagos.</p>
+  <p id="trialNote" hidden style="font-weight:700"></p>
   <p><button id="open" type="button" hidden>Abrir el pago</button></p>
   <p class="small" id="legal">Paddle.com es el comerciante registrado de todos nuestros pedidos. <a href="terminos.html">Términos</a> · <a href="reembolsos.html">Reembolsos</a> · <a href="privacidad.html">Privacidad</a></p>
 </main>
@@ -53,6 +54,9 @@
 // (checkout_offer() says "influencer"; owner's decision, 2026-11-21): 20-day trial price and
 // 3 USD off the first monthly charge (17 USD). The discount covers both monthly prices.
 // On the annual plan, influencer is 15 USD off the first year (180 → 165).
+// mila / milaTrial: «Regalo de Mila.Desk», the owner's own codes (checkout_offer() says "mila";
+// owner's decision, 2026-11-24): the same 20-day trial price and 5 USD off the first monthly
+// charge (15 USD, then 20); annual, 30 USD off the first year (the same discount as the code MDES).
 // Empty = no automatic discount. A creator code typed at checkout replaces it (Paddle
 // takes one discount per checkout).
 const ACCOUNTS = {
@@ -60,8 +64,8 @@ const ACCOUNTS = {
     environment: "production",
     token: "live_7dc23360a16139f31621a260c44",
     prices: {
-      monthly: { normal: "pri_01m731brqgkbgyhd65z50benht", trial: "pri_01m732dyjm6vdabkf5d833azv9", launch: "", mentoria: "dsc_01m7ceebmr0j56j6db5tp0ajas", mentorTrial: "pri_01m7tb5kyzxbsxdbth7w24x92c", influencer: "dsc_01m7y8fxs5ytvkkd91h0kee2pn", influencerTrial: "pri_01m7y8dp4wcymae3ag1vbewb3f" },
-      annual:  { normal: "pri_01m731c1bwrhzv99gy3y123tm3", trial: "pri_01m732errrq9wg2q4tmesbnbgm", launch: "", influencer: "dsc_01m7y91vrwmjm7a0qb4fy2j148" }
+      monthly: { normal: "pri_01m731brqgkbgyhd65z50benht", trial: "pri_01m732dyjm6vdabkf5d833azv9", launch: "", mentoria: "dsc_01m7ceebmr0j56j6db5tp0ajas", mentorTrial: "pri_01m7tb5kyzxbsxdbth7w24x92c", influencer: "dsc_01m7y8fxs5ytvkkd91h0kee2pn", influencerTrial: "pri_01m7y8dp4wcymae3ag1vbewb3f", mila: "dsc_01m860b5bvh75fepap12c6bmyc", milaTrial: "pri_01m7y8dp4wcymae3ag1vbewb3f" },
+      annual:  { normal: "pri_01m731c1bwrhzv99gy3y123tm3", trial: "pri_01m732errrq9wg2q4tmesbnbgm", launch: "", influencer: "dsc_01m7y91vrwmjm7a0qb4fy2j148", mila: "dsc_01m860defj1jrgwzwc32gbmmmd" }
     }
   },
   sandbox: {
@@ -125,7 +129,7 @@ if (!validUid || !priceId || !PADDLE.token) {
   script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
   script.onload = async () => {
     const mentoria = PADDLE.prices[plan] && PADDLE.prices[plan].mentoria;
-    if (mentoria || (PADDLE.prices[plan] && PADDLE.prices[plan].influencer)) {
+    if (mentoria || (PADDLE.prices[plan] && (PADDLE.prices[plan].influencer || PADDLE.prices[plan].mila))) {
       try {
         const res = await fetch("https://sbbcjnsyljjdljoihack.supabase.co/rest/v1/rpc/checkout_offer", {
           method: "POST",
@@ -140,8 +144,19 @@ if (!validUid || !priceId || !PADDLE.token) {
         } else if (offer === "influencer" && PADDLE.prices[plan].influencer) {
           discountId = PADDLE.prices[plan].influencer;
           if (trial && PADDLE.prices[plan].influencerTrial) priceId = PADDLE.prices[plan].influencerTrial;
+        } else if (offer === "mila" && PADDLE.prices[plan].mila) {
+          discountId = PADDLE.prices[plan].mila;
+          if (trial && PADDLE.prices[plan].milaTrial) priceId = PADDLE.prices[plan].milaTrial;
         }
       } catch { /* the general launch discount stays */ }
+    }
+    // Trial: say plainly that nothing is charged today and when the first charge comes
+    // (alliance document, 2026-11-22). Days follow the trial price: mentor 30, influencer 20, else 14.
+    if (trial) {
+      const days = priceId === PADDLE.prices[plan].mentorTrial ? 30 : priceId === PADDLE.prices[plan].influencerTrial ? 20 : 14;
+      const first = new Date(Date.now() + days * 864e5).toLocaleDateString(EN ? "en-US" : "es-ES", { day: "numeric", month: "long", year: "numeric" });
+      $("trialNote").textContent = EN ? `Nothing is charged today. Your first charge will be on ${first}.` : `No se cobra nada hoy. El primer cobro será el ${first}.`;
+      $("trialNote").hidden = false;
     }
     try {
       if (PADDLE.environment === "sandbox") Paddle.Environment.set("sandbox");
