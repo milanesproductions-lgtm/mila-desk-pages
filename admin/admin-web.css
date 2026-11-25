@@ -1,0 +1,26 @@
+/* Web version of the admin panel: sign-in screen and phone fixes. The extension's styles stay as they are. */
+#webLogin{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:#0b0b0b}
+#webLogin form{width:100%;max-width:360px;display:grid;gap:12px;background:#141414;border:1px solid #292929;border-radius:16px;padding:22px}
+#webLogin h2{margin:0;font-size:19px}#webLogin p{margin:0;color:#a4a4a4;font-size:13px}
+#webLogin label{display:grid;gap:5px;font-size:12.5px;color:#a4a4a4;font-weight:700}
+#webLogin input{font:inherit;font-size:16px;padding:11px 12px;background:#111;color:#fff;border:1px solid #333;border-radius:9px;outline:0}
+#webLogin input:focus{border-color:#ff5800}
+#webLogin button{font:inherit;font-weight:800;border:1px solid #ff5800;border-radius:9px;background:#ff5800;color:#140a04;font-size:15px;padding:12px;cursor:pointer}
+#webLogin .msg{color:#ffb37a;min-height:18px}
+#webLogout{position:fixed;right:12px;bottom:12px;z-index:40;padding:7px 12px;font-size:12px;opacity:.85}
+.grid2{grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr))}
+.cards{grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr))}
+@media (max-width:640px){
+  main{padding:16px 12px 70px}
+  section{padding:14px;border-radius:14px}
+  h1{font-size:20px}
+  /* 16px keeps the phone from zooming into a field when it is tapped. */
+  input,select,textarea{font-size:16px!important}
+  nav{flex-wrap:nowrap;overflow-x:auto;width:100%;padding-bottom:4px}
+  nav a{white-space:nowrap}
+  .eg-open{margin-left:0}
+  .item{flex-wrap:wrap}
+  .stat{min-width:0;flex:1 1 40%}
+  .eg-title h2{font-size:24px}
+  td,th{padding:8px 7px}
+}

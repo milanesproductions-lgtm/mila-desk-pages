@@ -1,0 +1,110 @@
+<!doctype html>
+<!-- Mila.Desk. Copyright (c) 2026 Jhoun Milanes (Milanes Production). All rights reserved. See LICENSE.txt. MD-ORIGIN-7F3A91C2 -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mila.Desk · Tu panel de colaboración</title>
+<style>
+:root{--b:#0b0b0b;--b2:#141414;--b3:#1b1b1b;--w:#fff;--m:#a4a4a4;--l:#292929;--o:#ff5800;--o-soft:rgba(255,88,0,.14);--ok:#4ade80;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--b);color:var(--w);font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:28px 22px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+h1{margin:0;font-size:24px;font-weight:850;letter-spacing:-.4px}h1 span{color:var(--o)}
+.sub{color:var(--m);font-size:13px;margin-top:4px}
+section{background:var(--b2);border:1px solid var(--l);border-radius:16px;padding:20px;margin-bottom:18px}
+h2{margin:0 0 4px;font-size:18px;font-weight:850}
+.hint{color:var(--m);font-size:12.5px;margin:3px 0 12px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.stat{background:var(--b3);border:1px solid var(--l);border-radius:12px;padding:10px 14px;min-width:150px;flex:1}
+.stat b{display:block;font-size:22px;color:var(--o)}.stat span{color:var(--m);font-size:12px}
+.stat.main{border-color:var(--o);background:var(--o-soft)}
+button.stat{font:inherit;text-align:left;cursor:pointer;color:inherit;min-width:110px;flex:0 1 auto}button.stat.on{border-color:var(--o);background:var(--o-soft)}
+button{font:inherit;font-weight:800;font-size:12px;border-radius:9px;padding:9px 13px;cursor:pointer;border:1px solid #333;background:#171717;color:var(--w)}
+button:hover{border-color:var(--o)}button.primary{background:var(--o);border-color:var(--o);color:#140a04}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--m);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--l)}
+td{padding:9px 10px;border-bottom:1px solid #202020;vertical-align:middle}
+td.small{color:var(--m);font-size:12px}
+.tablewrap{overflow-x:auto}
+.tag{display:inline-block;font-size:11px;font-weight:800;border-radius:7px;padding:3px 8px;background:#202020;color:#ddd}
+.tag.ok{background:rgba(74,222,128,.13);color:var(--ok)}.tag.warn{background:var(--o-soft);color:#ffb37a}.tag.bad{background:rgba(248,113,113,.13);color:var(--bad)}
+.rules{margin:0;padding-left:18px;color:#ddd;font-size:13px}.rules li{margin:3px 0}
+.feed{display:grid;gap:6px}.feed div{display:flex;justify-content:space-between;gap:12px;background:#111;border:1px solid #232323;border-radius:10px;padding:8px 12px;font-size:13px}.feed small{color:var(--m);white-space:nowrap}
+.codes{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.codes code{background:#111;border:1px solid #2a2a2a;border-radius:7px;padding:4px 8px;font:12px ui-monospace,Menlo,monospace}
+.empty{color:var(--m);font-size:13px;padding:8px 0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.preview{background:var(--o-soft);border:1px solid var(--o);border-radius:12px;padding:10px 14px;margin-bottom:16px;font-size:13px;font-weight:700}
+.rate{background:var(--o-soft);border:1px solid var(--o);border-radius:12px;padding:12px 16px;margin:10px 0 12px;font-size:14px}.rate b{color:var(--o);font-size:20px}.rate small{display:block;color:var(--m);font-size:12.5px;margin-top:3px}
+[hidden]{display:none!important}
+@media print{
+  :root{--b:#fff;--b2:#fff;--b3:#f4f4f4;--w:#111;--m:#555;--l:#ddd}
+  button,.noprint{display:none!important}
+  section{break-inside:avoid;border-color:#ddd}
+  td{border-color:#e5e5e5}.stat b{color:#c44300}
+}
+/* Every click shows (owner's request 2026-11-22). */
+button:active,[role="button"]:active,a.btn:active,.btn:active{transform:scale(.96);filter:brightness(.88)}
+</style>
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src https://sbbcjnsyljjdljoihack.supabase.co; img-src 'self' data: blob: https:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="admin-web.css">
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Tu panel de <span>colaboración</span></h1>
+      <div class="sub" id="who">Cargando…</div>
+      <div class="sub" id="myAccess" hidden></div>
+    </div>
+    <div class="row noprint">
+      <button type="button" id="refresh">Actualizar</button>
+      <button type="button" class="primary" id="pdf">Descargar PDF</button>
+    </div>
+  </header>
+  <div id="previewNote" class="preview noprint" hidden></div>
+  <div id="error" class="empty" hidden></div>
+  <div id="app" hidden>
+    <section>
+      <h2>Tus ganancias</h2>
+      <div class="rate" id="rateNow" hidden></div>
+      <p class="hint" id="nextPay"></p>
+      <div class="stats" id="money"></div>
+      <ul class="rules" id="rules"></ul>
+    </section>
+    <section>
+      <h2>En espera</h2>
+      <p class="hint">Cada pago espera 30 días por si hay reembolsos o reclamos. Al pasar ese tiempo, su comisión pasa a «Por cobrar».</p>
+      <div id="pending"></div>
+    </section>
+    <section>
+      <h2>Comisión por mes</h2>
+      <p class="hint">El mes es el del pago de tu alumna. Lo confirmado se te paga una vez al mes; si no llega a 25 USD, se acumula.</p>
+      <div id="months"></div>
+    </section>
+    <section>
+      <h2>Tus alumnos</h2>
+      <p class="hint">Solo ves su usuario y parte del correo, para cuidar sus datos.</p>
+      <div class="stats" id="studentStats"></div>
+      <div class="tablewrap" id="students"></div>
+    </section>
+    <section>
+      <h2>Movimientos</h2>
+      <div class="feed" id="feed"></div>
+    </section>
+    <section>
+      <h2>Tus códigos</h2>
+      <p class="hint">Si necesitas más códigos, pídeselos a Mila.Desk.</p>
+      <div class="stats" id="codeStats"></div>
+      <div id="codes"></div>
+    </section>
+  </div>
+</main>
+<script src="admin-web.js"></script>
+<script src="lib/mila-core.js"></script>
+<script src="socia.js"></script>
+</body>
+</html>

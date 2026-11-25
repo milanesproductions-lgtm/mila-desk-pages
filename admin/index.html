@@ -1,0 +1,218 @@
+<!doctype html>
+<!-- Mila.Desk. Copyright (c) 2026 Jhoun Milanes (Milanes Production). All rights reserved. See LICENSE.txt. MD-ORIGIN-7F3A91C2 -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mila.Desk · Administración</title>
+<style>
+:root{--b:#0b0b0b;--b2:#141414;--b3:#1b1b1b;--w:#fff;--m:#a4a4a4;--l:#292929;--o:#ff5800;--o-soft:rgba(255,88,0,.14);--o-border:rgba(255,88,0,.3);--ok:#4ade80;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--b);color:var(--w);font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:28px 22px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+h1{margin:0;font-size:24px;font-weight:850;letter-spacing:-.4px}h1 span{color:var(--o)}
+.sub{color:var(--m);font-size:13px;margin-top:4px}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+nav a{color:var(--w);text-decoration:none;font-weight:800;font-size:13px;padding:9px 13px;border:1px solid var(--l);border-radius:10px;background:var(--b2)}
+nav a:hover{border-color:var(--o);color:var(--o)}
+section{background:var(--b2);border:1px solid var(--l);border-radius:16px;padding:20px;margin-bottom:18px}
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+h2{margin:0;font-size:18px;font-weight:850}
+.hint{color:var(--m);font-size:12.5px;margin-top:3px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.stat{background:var(--b3);border:1px solid var(--l);border-radius:12px;padding:10px 14px;min-width:120px}
+.stat b{display:block;font-size:22px;color:var(--o)}.stat span{color:var(--m);font-size:12px}
+button.stat{font:inherit;text-align:left;cursor:pointer;color:inherit}button.stat:hover{border-color:var(--o)}button.stat.on{border-color:var(--o);background:rgba(255,88,0,.12)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input,select{background:#111;color:var(--w);border:1px solid #333;border-radius:9px;padding:9px 11px;font:inherit;font-size:13px;outline:0}
+input:focus,select:focus{border-color:var(--o)}
+button{font:inherit;font-weight:800;font-size:12px;border-radius:9px;padding:9px 13px;cursor:pointer;border:1px solid #333;background:#171717;color:var(--w)}
+button:hover{border-color:var(--o)}
+button.primary{background:var(--o);border-color:var(--o);color:#140a04}
+button.danger{color:var(--bad);border-color:#4a2323}
+button:disabled{opacity:.45;cursor:default}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--m);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--l)}
+td{padding:10px;border-bottom:1px solid #202020;vertical-align:middle}
+td.small{color:var(--m);font-size:12px}
+.tag{display:inline-block;font-size:11px;font-weight:800;border-radius:7px;padding:3px 8px;background:#202020;color:#ddd}
+.tag.ok{background:rgba(74,222,128,.13);color:var(--ok)}.tag.warn{background:var(--o-soft);color:#ffb37a}
+.list{display:grid;gap:8px;margin-top:10px}
+.item{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#111;border:1px solid #262626;border-radius:11px;padding:11px 13px}
+.item small{display:block;color:var(--m);font-size:12px;margin-top:2px}.item .off{opacity:.5}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+h3{margin:0 0 8px;font-size:13px;color:var(--m);text-transform:uppercase;letter-spacing:.5px}
+[hidden]{display:none!important}
+.item .user{margin-top:6px;font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.item .user.off{opacity:.55}.item .user button{padding:4px 9px;font-size:11px}
+.batch{display:grid;gap:8px;margin:12px 0;padding:12px;border:1px solid var(--o-border);border-radius:12px;background:#111}
+.batch textarea{width:100%;background:#0b0b0b;color:var(--w);border:1px solid #333;border-radius:9px;padding:9px;font:12.5px/1.5 ui-monospace,Menlo,monospace;resize:vertical}
+.alert{border-radius:9px;padding:8px 11px;margin:8px 0;font-size:13px;background:#1b1b1b;border:1px solid #333}.alert.warn{border-color:#7a4b12;color:#fbbf24}.alert.ok{border-color:#1f6b3a;color:#4ade80}div.mentor .grid2{margin-top:10px}#app.mentor-view>section:not(#mentoras){display:none}#app.mentor-view #mentoras>.head{display:none}div.mentor textarea{width:100%;background:#0b0b0b;color:var(--w);border:1px solid #333;border-radius:9px;padding:9px;font:inherit;font-size:13px;resize:vertical}details.group{background:#111;border:1px solid #262626;border-radius:11px;padding:11px 13px}details.group summary{cursor:pointer;font-weight:800}details.group summary small{color:var(--m);font-weight:600;margin-left:6px}details.group .list{margin-top:8px}
+.msg{min-height:18px;font-size:12.5px;color:#ffb37a;margin-top:8px}
+.empty{color:var(--m);padding:18px;text-align:center;font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:#111;border:1px solid #262626;border-radius:12px;padding:13px}
+.card .label{color:var(--m);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-top:8px}
+.card img{display:block;width:100%;max-height:220px;object-fit:contain;background:#0b0b0b;border:1px solid #262626;border-radius:9px;margin-top:5px}
+.card a{color:#ff8a4c;font-weight:700;text-decoration:none}
+.locked{max-width:520px;margin:80px auto;text-align:center;color:var(--m)}
+.tablewrap{overflow-x:auto}
+/* 💰 Ganancias: its own full-width screen, like a mentor's panel (owner, 2026-11-24). */
+.eg-open{margin-left:auto;background:linear-gradient(135deg,#ff5800,#ff9a4d);border:0;color:#140a04;font-size:13.5px;padding:10px 18px;border-radius:12px;box-shadow:0 6px 22px rgba(255,88,0,.35)}
+.eg-open:hover{filter:brightness(1.08)}.eg-open.on{box-shadow:0 0 0 2px #fff4,0 6px 22px rgba(255,88,0,.35)}
+main.wide{max-width:1360px}
+#app.earnings-view>section:not(#ganancias){display:none}
+#ganancias{background:none;border:0;padding:0}
+.eg-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.eg-title{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.eg-title h2{font-size:32px;letter-spacing:-.7px}
+.eg-periods{display:flex;gap:4px;background:var(--b2);border:1px solid var(--l);border-radius:13px;padding:4px;flex-wrap:wrap}
+.eg-periods button{background:none;border:0;color:var(--m);padding:8px 13px;border-radius:9px;font-size:12.5px}
+.eg-periods button:hover{color:var(--w)}.eg-periods button.on{background:var(--o);color:#140a04}
+.eg-filter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 16px;color:var(--m);font-size:13px}
+.eg-filter b{color:var(--w)}.eg-filter button{padding:5px 10px;font-size:11.5px}
+.eg-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.eg-kpi{background:var(--b2);border:1px solid var(--l);border-radius:20px;padding:20px 22px;min-width:0}
+.eg-kpi span{color:var(--m);font-size:12.5px;font-weight:700}
+.eg-kpi b{display:block;font-size:32px;font-weight:850;letter-spacing:-.8px;margin:8px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eg-kpi small{color:var(--m);font-size:12px}
+.eg-kpi.hero{background:linear-gradient(160deg,rgba(255,88,0,.24),rgba(255,88,0,.03) 70%);border-color:var(--o-border)}.eg-kpi.hero b{color:var(--o)}
+.eg-wait{display:flex;gap:10px;align-items:flex-start;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.35);color:#fde68a;border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13.5px}.eg-wait b{color:#fbbf24}
+.eg-card{background:var(--b2);border:1px solid var(--l);border-radius:20px;padding:22px;margin-bottom:14px;min-width:0}
+.eg-card h3{margin-bottom:14px}.eg-card .hint{margin-top:10px}
+.eg-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:14px}
+.eg-stack{display:flex;height:26px;border-radius:13px;overflow:hidden;background:#1e1e1e;gap:2px}
+.eg-stack i{display:block;height:100%;min-width:3px;transition:opacity .15s}
+.eg-stack.hl i:not(.on){opacity:.25}
+.eg-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:14px}
+.eg-legend div{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;background:#111;border:1px solid #232323;cursor:default}
+.eg-legend div:hover{border-color:#444}.eg-legend span{color:var(--m);font-size:12px;display:flex;align-items:center;gap:7px}
+.eg-legend span:before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c)}.eg-legend b{font-size:17px}
+.eg-chart{display:flex;align-items:flex-end;gap:10px;height:230px;border-bottom:1px solid var(--l);padding-top:26px}
+.eg-chart button{flex:1;min-width:0;background:none;border:0;padding:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;border-radius:0}
+.eg-chart em{font-style:normal;font-size:11.5px;font-weight:800;color:var(--m);white-space:nowrap}
+.eg-chart i{display:block;width:100%;max-width:58px;background:#3b2414;border-radius:9px 9px 0 0;min-height:3px;transition:background .15s}
+.eg-chart button.in i{background:var(--o)}.eg-chart button.in em{color:var(--w)}.eg-chart button:hover i{background:#ff7a33}.eg-chart button.on i{background:var(--o);box-shadow:0 0 0 2px #fff6}
+.eg-chart button:active{transform:none}
+.eg-labels{display:flex;gap:10px;margin-top:8px}.eg-labels span{flex:1;min-width:0;text-align:center;color:var(--m);font-size:11.5px;white-space:nowrap;overflow:hidden}
+.eg-src{display:grid;gap:8px}
+.eg-src button{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;text-align:left;background:#111;border:1px solid #232323;border-radius:13px;padding:12px 14px;font-size:13px}
+.eg-src button.on{border-color:var(--o);background:rgba(255,88,0,.1)}
+.eg-src small{color:var(--m);font-weight:600}.eg-src .bar{grid-column:1/-1;height:6px;border-radius:3px;background:#222;overflow:hidden}.eg-src .bar i{display:block;height:100%;background:var(--o)}
+.eg-subs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.eg-subs div{background:#111;border:1px solid #232323;border-radius:13px;padding:13px 14px}
+.eg-subs b{display:block;font-size:24px;font-weight:850}.eg-subs span{color:var(--m);font-size:12px}
+.eg-subs .wide{grid-column:1/-1;border-color:var(--o-border)}.eg-subs .wide b{color:var(--o)}
+@media (max-width:900px){.eg-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.eg-grid{grid-template-columns:1fr}}
+@media (max-width:520px){.eg-kpis{grid-template-columns:1fr}.eg-kpi b{font-size:26px}}
+.fb{background:#111;border:1px solid #262626;border-radius:12px;padding:13px}
+.fb.new{border-color:var(--o-border)}
+.fb-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.fb-who{font-weight:800}.fb-who small{color:var(--m);font-weight:500;margin-left:6px}
+.fb-text{white-space:pre-wrap;word-break:break-word;margin:10px 0;line-height:1.5}
+.fb-meta{color:var(--m);font-size:12px}
+.fb a{color:#ff8a4c;font-weight:700;text-decoration:none}
+/* Every click shows (owner's request 2026-11-22). */
+button:active,[role="button"]:active,a.btn:active,.btn:active{transform:scale(.96);filter:brightness(.88)}
+</style>
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src https://sbbcjnsyljjdljoihack.supabase.co; img-src 'self' data: blob: https:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<link rel="stylesheet" href="admin-web.css">
+</head>
+<body>
+<main>
+<header>
+  <div><h1>Mila.Desk · <span>Administración</span></h1><div class="sub" id="who">Comprobando tu acceso…</div></div>
+  <nav id="sectionsNav" hidden><a href="#registros">Registros</a><a href="#accesos">Accesos</a><a href="#mentoras">Afiliadas</a><a href="#muestras">Free Samples</a><a href="#kits">Media kits <span id="kitBadge" class="tag warn" hidden></span></a><a href="#sugerencias">Sugerencias <span id="feedbackNewBadge" class="tag warn" hidden></span></a></nav>
+  <button id="earningsOpen" type="button" class="eg-open" hidden>💰 Ganancias</button>
+</header>
+
+<div id="locked" class="locked" hidden></div>
+
+<div id="app" hidden>
+<section id="registros">
+  <div class="head"><div><h2>Registros recientes</h2><div class="hint">Aquí salen las cuentas que se registraron hoy. Para ver otros días, busca por usuario o correo. Dar acceso usa el correo de la cuenta.</div></div>
+    <div class="row"><label class="hint">Acceso hasta <input id="signupUntil" type="date"></label><button id="signupsRefresh" type="button">↻ Actualizar</button></div></div>
+  <div class="stats" id="signupStats"></div>
+  <div class="row"><input id="signupSearch" placeholder="Buscar por usuario o correo" style="flex:1;min-width:220px"><label class="hint"><input id="signupOnlyFree" type="checkbox"> Solo plan gratis</label></div>
+  <div class="tablewrap"><table><thead><tr><th>Usuario</th><th>Correo</th><th>Registro</th><th>Correo confirmado</th><th>Acceso</th><th></th></tr></thead><tbody id="signupRows"><tr><td colspan="6" class="empty">Cargando…</td></tr></tbody></table></div>
+  <div id="signupMsg" class="msg" role="status"></div>
+</section>
+
+<section id="accesos">
+  <div class="head"><div><h2>Accesos</h2><div class="hint">Regala acceso, crea códigos y quita accesos.</div></div><button id="accessRefresh" type="button">↻ Actualizar</button></div>
+  <div class="grid2">
+    <div>
+      <h3>Regalar acceso</h3>
+      <div class="row"><input id="grantWho" maxlength="120" placeholder="Correo o usuario de creador" style="flex:1;min-width:200px"><label class="hint">Hasta <input id="grantUntil" type="date"></label><button id="grantBtn" class="primary" type="button">Dar acceso</button></div>
+      <div class="hint">Deja la fecha vacía para que no tenga fin. Usa el correo si dos cuentas tienen el mismo usuario.</div>
+      <h3 style="margin-top:18px">Códigos</h3>
+      <div class="row"><input id="codeLabel" maxlength="80" placeholder="Nombre (por ejemplo, la mentora)" style="flex:1;min-width:180px"></div>
+      <div class="row" style="margin-top:8px">
+        <label class="hint">Cantidad <input id="codeCount" type="number" min="1" max="300" value="1" style="width:76px"></label>
+        <label class="hint">Días de acceso <input id="codeDays" type="number" min="1" max="730" value="30" style="width:76px"></label>
+        <label class="hint">Canjear antes del <input id="codeUntil" type="date"></label>
+        <button id="codeCreate" class="primary" type="button">＋ Crear código</button>
+      </div>
+      <div class="hint">Cada código sirve para una sola persona. Los días empiezan cuando la persona lo canjea. Quien usa un código ya no recibe los 14 días de prueba, y quien ya tuvo acceso gratis (código, prueba o regalo) no puede canjear otro. Los códigos de premio de las mentoras se crean en Mentoras. Deja «Canjear antes del» vacío para que no caduque.</div>
+      <div id="codeBatch" class="batch" hidden>
+        <b id="codeBatchTitle"></b>
+        <textarea id="codeBatchList" readonly rows="6"></textarea>
+        <div class="row"><button id="codeCopyAll" type="button">Copiar todos</button><button id="codeCsv" type="button">⬇ Descargar lista</button><button id="codePdf" type="button">🖨 Generar PDF</button></div>
+      </div>
+      <div id="codeList" class="list"></div>
+    </div>
+    <div>
+      <h3>Quién tiene acceso</h3>
+      <div class="row"><input id="grantSearch" placeholder="Buscar por usuario, correo o mentora" style="flex:1;min-width:200px"></div>
+      <details id="grantFold" class="group" style="margin-top:8px"><summary>Ver la lista<small id="grantCount"></small></summary><div id="grantList" class="list"></div></details>
+    </div>
+  </div>
+  <div id="accessMsg" class="msg" role="status"></div>
+</section>
+
+<section id="mentoras">
+  <div class="head"><div><h2>Afiliadas</h2><div class="hint">Una por cada lista de códigos con nombre o creada aquí con su cuenta. Sus alumnos, su cuenta, la alianza de 6 meses, comisiones y más códigos.</div></div><button id="mentorsRefresh" type="button">↻ Actualizar</button></div>
+  <div id="mentorList" class="list"><div class="empty">Cargando…</div></div>
+  <div id="mentorMsg" class="msg" role="status"></div>
+</section>
+
+<section id="ganancias" hidden>
+  <div class="eg-top"><button id="earningsBack" type="button">← Volver a administración</button><div class="row"><button id="earningsCsv" type="button">⬇ Descargar para el contador</button><button id="earningsRefresh" type="button">↻ Actualizar</button></div></div>
+  <div class="eg-title"><div><h2>💰 Ganancias</h2><div class="hint">Lo que cobra Paddle, lo que se va en impuestos, comisiones y reembolsos, y lo que te queda. Los pagos se guardan desde el 16 de noviembre de 2026.</div></div>
+    <div class="eg-periods" id="earningsPeriods"><button type="button" data-period="month">Este mes</button><button type="button" data-period="last">Mes pasado</button><button type="button" data-period="3m">3 meses</button><button type="button" data-period="year">Este año</button><button type="button" data-period="all">Todo</button></div></div>
+  <div id="earnings"><div class="empty">Cargando…</div></div>
+  <div id="earningsMsg" class="msg" role="status"></div>
+</section>
+
+<section id="muestras">
+  <div class="head"><div><h2>Free Samples</h2><div class="hint">Solicitudes pendientes de revisión y categorías de las marcas aprobadas.</div></div>
+    <div class="row"><button id="fillBtn" type="button" hidden>Completar categorías</button><button id="samplesRefresh" type="button">↻ Actualizar</button></div></div>
+  <div id="fillMsg" class="hint" role="status"></div>
+  <div id="sampleCards" class="cards" style="margin-top:12px"><div class="empty">Cargando…</div></div>
+  <div id="sampleMsg" class="msg" role="status"></div>
+</section>
+
+<section id="kits">
+  <div class="head"><div><h2>Media kits: cambios de nombre</h2><div class="hint">El nombre del enlace es fijo. Aquí salen las solicitudes de cambio. Al aceptar, el enlace cambia en ese momento y el anterior deja de funcionar.</div></div>
+    <button id="kitsRefresh" type="button">↻ Actualizar</button></div>
+  <div id="kitList" class="list"><div class="empty">Cargando…</div></div>
+  <div id="kitMsg" class="msg" role="status"></div>
+</section>
+
+<section id="sugerencias">
+  <div class="head"><div><h2>Sugerencias y errores</h2><div class="hint">Lo que envían los creadores desde Configuración. Los nuevos aparecen primero.</div></div>
+    <div class="row"><select id="feedbackKind" aria-label="Tipo"><option value="">Todos los tipos</option><option value="suggestion">💡 Sugerencias</option><option value="bug">🐞 Errores</option></select><select id="feedbackStatus" aria-label="Estado"><option value="open">Sin resolver</option><option value="new">Nuevos</option><option value="seen">Vistos</option><option value="resolved">Resueltos</option><option value="">Todos</option></select><button id="feedbackRefresh" type="button">↻ Actualizar</button></div></div>
+  <div class="stats" id="feedbackStats"></div>
+  <div id="feedbackList" class="list"><div class="empty">Cargando…</div></div>
+  <div id="feedbackMsg" class="msg" role="status"></div>
+</section>
+</div>
+</main>
+<script src="admin-web.js"></script>
+<script src="lib/mila-core.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
