@@ -99,8 +99,14 @@
     return { ok: false, error: "Esto solo funciona en la extensión de Chrome." };
   }
 
-  Object.defineProperty(window, "chrome", {
-    configurable: true,
-    value: { runtime: { sendMessage, getURL: (path) => path } },
-  });
+  // Real Chrome already has a non-configurable window.chrome (writable, without runtime on a web
+  // page), so redefining it throws there; assigning works. defineProperty is only the fallback.
+  const runtime = { sendMessage, getURL: (path) => path };
+  try { window.chrome = { runtime }; } catch {}
+  if (window.chrome?.runtime !== runtime) {
+    try { Object.defineProperty(window, "chrome", { configurable: true, writable: true, value: { runtime } }); } catch {}
+  }
+  if (window.chrome?.runtime !== runtime) {
+    try { Object.defineProperty(window.chrome, "runtime", { configurable: true, value: runtime }); } catch {}
+  }
 })();
