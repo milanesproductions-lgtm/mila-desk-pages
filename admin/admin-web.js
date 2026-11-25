@@ -11,6 +11,8 @@
   const STORE = "milaAdminRefresh";
   let session = null;
   let pending = null;
+  // The same sign-in serves the partner panel (socia.html), where a mentor enters with her own account.
+  const partner = /socia\.html$/.test(location.pathname);
 
   const store = {
     get() { try { return localStorage.getItem(STORE) || ""; } catch { return ""; } },
@@ -36,7 +38,7 @@
     return new Promise((resolve) => {
       const box = document.createElement("div");
       box.id = "webLogin";
-      box.innerHTML = `<form><h2>Mila.Desk · Administración</h2><p>Entra con tu cuenta de administradora.</p>
+      box.innerHTML = `<form><h2>${partner ? "Mila.Desk · Tu panel de colaboración" : "Mila.Desk · Administración"}</h2><p>${partner ? "Entra con tu cuenta de Mila.Desk." : "Entra con tu cuenta de administradora."}</p>
         <label>Correo<input type="email" name="email" autocomplete="username" required></label>
         <label>Contraseña<input type="password" name="password" autocomplete="current-password" required></label>
         <button type="submit">Entrar</button><p class="msg" role="status"></p></form>`;

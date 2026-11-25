@@ -13,15 +13,24 @@
   const STATE = { pagando: ['Pagando (con suscripción)', 'ok'], gratis: ['Periodo gratis', 'warn'], sin_pagar: ['Terminó sin pagar', ''], cancelo: ['Canceló', 'bad'], otro_acceso: ['Otro acceso', ''] };
   const TYPE = { mensual: 'Mensual', anual: 'Anual', primero: 'Primer pago (mensual)', primero_anual: 'Primer pago (anual)' };
   let data = null, filter = '';
+  // «Mis códigos» (owner's request 2026-11-25): its own screen; 5 codes per group until «Mostrar todos»;
+  // a copied code waits to be marked as sent, and sent ones go to the end of the list.
+  let codesView = false;
+  const expanded = new Set(), copied = new Set(), PAGE = 5;
   // Admin preview (owner's request, 2026-11-21): socia.html?socia=<name> shows that partner's panel
   // exactly as she sees it; admin_partner_panel() answers only to an admin.
   const preview = new URLSearchParams(location.search).get('socia') || '';
 
+  async function connection() {
+    const c = await chrome.runtime.sendMessage({ type: 'MILA_ADMIN_CONNECTION' }).catch(() => null);
+    if (!c?.ok) throw new Error(c?.error || 'Inicia sesión en Mila.Desk desde el popup y vuelve a abrir esta página.');
+    return c;
+  }
+
   async function load() {
     $('error').hidden = true;
     try {
-      const c = await chrome.runtime.sendMessage({ type: 'MILA_ADMIN_CONNECTION' }).catch(() => null);
-      if (!c?.ok) throw new Error(c?.error || 'Inicia sesión en Mila.Desk desde el popup y vuelve a abrir esta página.');
+      const c = await connection();
       const res = await fetch(`${c.url}/rest/v1/rpc/${preview ? 'admin_partner_panel' : 'my_partner_panel'}`, {
         method: 'POST', headers: { apikey: c.key, Authorization: `Bearer ${c.token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(preview ? { p_name: preview } : {})
@@ -120,27 +129,62 @@
     const checkout = codes.filter(x => x.checkout), access = codes.filter(x => !x.checkout);
     const free = access.filter(x => x.active && Number(x.uses) < Number(x.max_uses));
     const freeCourse = free.filter(x => x.offer !== 'mila'), freeSocial = free.filter(x => x.offer === 'mila');
-    const codeList = (list, id, title) => `<h3>${title}</h3><div class="row noprint"><button type="button" id="${id}">Copiar los ${list.length} códigos</button></div><div class="codes">${list.map(x => `<code>${esc(x.code)}</code>`).join('')}</div>`;
     const social = access.filter(x => x.offer === 'mila');
     $('codeStats').innerHTML = (social.length
       ? [[access.length - social.length, 'Códigos del curso'], [freeCourse.length, 'Libres del curso'], [social.length, 'Códigos para redes'], [freeSocial.length, 'Libres para redes']]
       : [[access.length, 'Códigos'], [access.length - free.length, 'Usados o apagados'], [free.length, 'Libres']])
       .map(([n, t]) => `<div class="stat"><b>${n}</b><span>${t}</span></div>`).join('');
+    const sentDay = iso => new Date(iso).toLocaleDateString('es-DO', { day: 'numeric', month: 'short' });
+    const codeRow = x => {
+      const sent = !!x.sent_at, cp = !sent && copied.has(x.code), code = esc(x.code);
+      return `<div class="crow ${sent ? 'sent' : cp ? 'copied' : ''}"><code>${code}</code>${sent ? `<span class="tag ok">Enviado · ${sentDay(x.sent_at)}</span>` : cp ? '<span class="tag warn">Copiado</span>' : ''}<div class="actions noprint">${sent
+        ? (preview ? '' : `<button type="button" data-unsend="${code}">Deshacer</button>`)
+        : `<button type="button" data-copy="${code}">${cp ? 'Copiar otra vez' : 'Copiar'}</button>${cp && !preview ? `<button type="button" class="primary" data-send="${code}">Marcar como enviado</button>` : ''}`}</div></div>`;
+    };
+    const group = (key, list, title) => {
+      const sorted = list.filter(x => !x.sent_at).concat(list.filter(x => x.sent_at).sort((a, b) => Date.parse(a.sent_at) - Date.parse(b.sent_at)));
+      const open = expanded.has(key), waiting = list.length - list.filter(x => x.sent_at).length;
+      return `<div class="group-title"><h3>${title}</h3><span class="hint" style="margin:0">${waiting} sin enviar · ${list.length - waiting} enviados</span></div>`
+        + `<div class="clist">${(open ? sorted : sorted.slice(0, PAGE)).map(codeRow).join('')}</div>`
+        + (sorted.length > PAGE ? `<button type="button" class="more noprint" data-more="${key}">${open ? 'Mostrar menos' : `Mostrar todos (${sorted.length})`}</button>` : '');
+    };
     $('codes').innerHTML = (checkout.length ? `<p class="hint">Código para el plan anual (se escribe en la ventana de pago): ${checkout.map(x => `<code>${esc(x.code)}</code>`).join(' ')}</p>` : '')
+      + '<p class="hint noprint" id="copyMsg"></p>'
       + (!free.length ? '<div class="empty">No te quedan códigos libres.</div>'
-        : !social.length ? `<div class="row noprint"><button type="button" id="copyFree">Copiar los ${free.length} códigos libres</button><span class="hint" id="copyMsg"></span></div>
-        <div class="codes">${free.map(x => `<code>${esc(x.code)}</code>`).join('')}</div>`
-        : `<p class="hint noprint" id="copyMsg"></p>${freeCourse.length ? codeList(freeCourse, 'copyCourse', 'Para tu curso') : ''}${freeSocial.length ? codeList(freeSocial, 'copySocial', 'Para tus redes (20 días gratis, el primer mes 15 USD)') : ''}`);
+        : !social.length ? group('todos', free, 'Tus códigos libres')
+        : (freeCourse.length ? group('curso', freeCourse, '🎓 Para tu curso') : '') + (freeSocial.length ? group('redes', freeSocial, '🌐 Para tus redes (20 días gratis, el primer mes 15 USD)') : ''));
+    $('app').classList.toggle('codes-view', codesView);
     $('app').hidden = false;
   }
 
   document.addEventListener('click', async event => {
     const b = event.target.closest('button'); if (!b) return;
     if (b.dataset.filter !== undefined) { filter = b.dataset.filter; render(); return; }
-    if (b.id === 'copyFree' || b.id === 'copyCourse' || b.id === 'copySocial') {
-      const free = (data.codes || []).filter(x => !x.checkout && x.active && Number(x.uses) < Number(x.max_uses)
-        && (b.id === 'copyFree' || (x.offer === 'mila') === (b.id === 'copySocial'))).map(x => x.code);
-      try { await navigator.clipboard.writeText(free.join('\n')); $('copyMsg').textContent = 'Copiados.'; } catch { $('copyMsg').textContent = 'No se pudieron copiar.'; }
+    if (b.id === 'openCodes' || b.id === 'closeCodes') { codesView = b.id === 'openCodes'; render(); window.scrollTo(0, 0); return; }
+    if (b.dataset.more) { expanded.has(b.dataset.more) ? expanded.delete(b.dataset.more) : expanded.add(b.dataset.more); render(); return; }
+    if (b.dataset.copy) {
+      let ok = true;
+      try { await navigator.clipboard.writeText(b.dataset.copy); } catch { ok = false; }
+      // Even if the browser refused, she can copy it by hand and still mark it as sent.
+      copied.add(b.dataset.copy); render();
+      if (!ok) $('copyMsg').textContent = 'No se pudo copiar solo. Mantén presionado el código para copiarlo.';
+      return;
+    }
+    const code = b.dataset.send || b.dataset.unsend;
+    if (code) {
+      b.disabled = true;
+      try {
+        const c = await connection();
+        const res = await fetch(`${c.url}/rest/v1/rpc/partner_mark_code_sent`, {
+          method: 'POST', headers: { apikey: c.key, Authorization: `Bearer ${c.token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_code: code, p_sent: !!b.dataset.send })
+        });
+        if (!res.ok) throw new Error();
+        const item = (data.codes || []).find(x => x.code === code);
+        if (item) item.sent_at = await res.json();
+        copied.delete(code);
+        render();
+      } catch { b.disabled = false; $('copyMsg').textContent = 'No se pudo guardar. Revisa tu conexión y vuelve a intentarlo.'; }
     }
   });
   $('refresh').addEventListener('click', load);
