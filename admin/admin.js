@@ -319,8 +319,8 @@
   // codes, her students by state, the alliance dates and reminders, and «add codes» with
   // the same name, days and deadline as the list she already has.
   let allCodes = [], mentorRows = [], mentorStudents = [], mentorPayments = [], mentorPayouts = [];
-  const STATE_LABELS = { pagando: 'Pagando', gratis: 'Gratis (mes o prueba)', sin_pagar: 'Terminó el mes sin pagar', sin_tarjeta: 'Falta la tarjeta', cancelo: 'Canceló', otro_acceso: 'Regalo tuyo' };
-  const STATE_TAGS = { pagando: 'ok', gratis: '', sin_pagar: 'warn', sin_tarjeta: '', cancelo: 'warn', otro_acceso: '' };
+  const STATE_LABELS = { pagando: 'Pagando', pago_fallido: '⚠️ Pago fallido', gratis: 'Gratis (mes o prueba)', sin_pagar: 'Terminó el mes sin pagar', sin_tarjeta: 'Falta la tarjeta', cancelo: 'Canceló', otro_acceso: 'Regalo tuyo' };
+  const STATE_TAGS = { pagando: 'ok', pago_fallido: 'warn', gratis: '', sin_pagar: 'warn', sin_tarjeta: '', cancelo: 'warn', otro_acceso: '' };
   // One row per person (someone who redeemed two codes counted once), with every code they used.
   function uniqueStudents(rows) {
     const byUser = new Map();
@@ -442,13 +442,14 @@
         if (st === 'gratis' && s.sub_status === 'on_trial') return s.sub_access_until ? `prueba con tarjeta hasta el ${new Date(s.sub_access_until).toLocaleDateString('es-DO')}` : 'prueba con tarjeta'; // 14, 20 or 30 days by offer
         if (st === 'gratis') return s.plan_expires_at ? `hasta el ${new Date(s.plan_expires_at).toLocaleDateString('es-DO')}` : '';
         if (st === 'pagando') return s.sub_since ? `desde el ${new Date(s.sub_since).toLocaleDateString('es-DO')}` : '';
+        if (st === 'pago_fallido') return 'Paddle no pudo cobrar y lo sigue intentando; si cobra, pasa a Pagando sola';
         if (st === 'cancelo') return s.sub_access_until ? `acceso hasta el ${new Date(s.sub_access_until).toLocaleDateString('es-DO')}` : '';
         if (st === 'otro_acceso') return s.plan_expires_at ? `hasta el ${new Date(s.plan_expires_at).toLocaleDateString('es-DO')}` : 'sin fecha de fin; no cuenta como alumno';
         return s.plan_expires_at ? `el mes terminó el ${new Date(s.plan_expires_at).toLocaleDateString('es-DO')}` : '';
       };
       return `<div class="mentor" data-mentor-card="${esc(name)}"><div class="row" style="align-items:center"><button type="button" data-mback>← Volver a afiliadas</button><h3 style="margin:0;font-size:18px;text-transform:none;letter-spacing:0;color:var(--w)">${partnerBadge(mentor?.kind).icon} ${esc(name)}${partnerBadge(mentor?.kind).tag}${mentor?.active === false ? ' <span class="tag warn">terminada</span>' : ''}</h3>${mentor?.kind === 'mila' ? '' : `<button type="button" class="primary" data-mview="${esc(mentor?.name || name)}" style="margin-left:auto">👁 Ver su panel como ella lo ve</button>`}</div>
         ${sum.alerts.map(a => `<div class="alert ${esc(a.kind)}">${esc(a.text)}</div>`).join('')}
-        <div class="stats">${[[sum.count.pagando, 'pagando'], [sum.count.gratis, 'en periodo gratis'], [sum.count.sin_pagar, 'terminaron sin pagar'], [sum.count.sin_tarjeta, 'falta la tarjeta'], [sum.count.cancelo, 'cancelaron'], [sum.free, 'códigos libres']].map(([n, t]) => `<div class="stat"><b>${n}</b><span>${t}</span></div>`).join('')}</div>
+        <div class="stats">${[[sum.count.pagando, 'pagando'], ...(sum.count.pago_fallido ? [[sum.count.pago_fallido, 'con pago fallido']] : []), [sum.count.gratis, 'en periodo gratis'], [sum.count.sin_pagar, 'terminaron sin pagar'], [sum.count.sin_tarjeta, 'falta la tarjeta'], [sum.count.cancelo, 'cancelaron'], [sum.free, 'códigos libres']].map(([n, t]) => `<div class="stat"><b>${n}</b><span>${t}</span></div>`).join('')}</div>
         <div class="grid2">
           <div>
             <h3>Alianza</h3>
@@ -470,7 +471,7 @@
         ${checkoutHtml(name)}
         ${mentor?.kind === 'mila' ? '' : commissionHtml(name)}
         <h3>Alumnos</h3>
-        <div class="row">${chip('', students.length)}${['pagando', 'gratis', 'sin_tarjeta', 'sin_pagar', 'cancelo', 'otro_acceso'].filter(st => !['otro_acceso', 'sin_tarjeta'].includes(st) || sum.count[st]).map(st => chip(st, sum.count[st])).join('')}</div>
+        <div class="row">${chip('', students.length)}${['pagando', 'pago_fallido', 'gratis', 'sin_tarjeta', 'sin_pagar', 'cancelo', 'otro_acceso'].filter(st => !['otro_acceso', 'sin_tarjeta', 'pago_fallido'].includes(st) || sum.count[st]).map(st => chip(st, sum.count[st])).join('')}</div>
         <div class="tablewrap"><table><thead><tr><th>Usuario</th><th>Correo</th><th title="🌐 = código para redes">Código</th><th>Canjeó</th><th>Estado</th></tr></thead><tbody>${shown.length ? shown.map(s => {
           const st = MilaCore.mentorStudentState(s, now);
           const prize = st === 'pagando' && mentor?.kind !== 'mila' ? ` <button type="button" class="small" data-sprize="${esc(s.user_id)}" data-who="${esc(s.username || s.email || '')}">🎁 Dar premio de 1 mes</button>` : '';

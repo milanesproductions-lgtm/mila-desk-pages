@@ -1790,7 +1790,8 @@
   }
   // Mentors panel (owner's request, 2026-11-15; «Propuesta de Alianza … Mentoras»). Where
   // each student of a mentor stands today, from admin_mentor_students():
-  // pagando: a Paddle subscription with access (past_due still counts until Paddle ends it);
+  // pagando: a Paddle subscription with access; pago_fallido: Paddle couldn't charge and is retrying
+  // (owner's request 2026-11-28: shown as paying, the mentor looked for a payment that wasn't there);
   // cancelo: had a subscription that ended; gratis: the code's free month is still running;
   // otro_acceso: has a gift or Premium given by an administrator, without a subscription;
   // sin_pagar: the free month ended and no subscription followed.
@@ -1801,7 +1802,8 @@
     if(status){
       // Paying only after a real charge (owner's decision, 2026-11-16): the 14-day trial is free time.
       if(access==="active"&&status==="on_trial") return "gratis";
-      if(access==="active"&&(status==="active"||status==="past_due")) return "pagando";
+      if(status==="past_due") return "pago_fallido";
+      if(access==="active"&&status==="active") return "pagando";
       return "cancelo";
     }
     if(!row?.plan) return "sin_tarjeta";
@@ -1829,7 +1831,7 @@
   function mentorSummary({codes=[],students=[],mentor=null,now=Date.now(),kind="mentora",firstPaidAt=null}={}){
     const influencer=kind==="influencer", months=influencer?3:MENTOR_MONTHS;
     if(kind==="mila"){ mentor=null; firstPaidAt=null; }
-    const count={gratis:0,pagando:0,cancelo:0,sin_pagar:0,sin_tarjeta:0,otro_acceso:0};
+    const count={gratis:0,pagando:0,pago_fallido:0,cancelo:0,sin_pagar:0,sin_tarjeta:0,otro_acceso:0};
     for(const s of students||[]) count[mentorStudentState(s,now)]++;
     const used=(codes||[]).filter(c=>Number(c?.uses)>0).length;
     const alerts=[];

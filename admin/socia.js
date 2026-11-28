@@ -10,7 +10,7 @@
   const usd = c => '$' + ((Number(c) || 0) / 100).toFixed(2);
   const day = iso => iso ? new Date(iso).toLocaleDateString('es-DO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
   const monthName = key => new Date(`${key}-15T12:00:00`).toLocaleDateString('es-DO', { month: 'long', year: 'numeric' });
-  const STATE = { pagando: ['Pagando (con suscripción)', 'ok'], gratis: ['Periodo gratis', 'warn'], sin_tarjeta: ['Falta poner la tarjeta', 'warn'], sin_pagar: ['Terminó sin pagar', ''], cancelo: ['Canceló', 'bad'], otro_acceso: ['Otro acceso', ''] };
+  const STATE = { pagando: ['Pagando (con suscripción)', 'ok'], pago_fallido: ['⚠️ Pago fallido (se reintenta el cobro)', 'bad'], gratis: ['Periodo gratis', 'warn'], sin_tarjeta: ['Falta poner la tarjeta', 'warn'], sin_pagar: ['Terminó sin pagar', ''], cancelo: ['Canceló', 'bad'], otro_acceso: ['Otro acceso', ''] };
   const TYPE = { mensual: 'Mensual', anual: 'Anual', primero: 'Primer pago (mensual)', primero_anual: 'Primer pago (anual)' };
   let data = null, filter = '';
   // «Mis códigos» (owner's request 2026-11-25): its own screen; 5 codes per group until «Mostrar todos»;
