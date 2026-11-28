@@ -59,18 +59,65 @@
   };
 
   // ── Recent sign-ups ─────────────────────────────────────────────────────────────
+  // One Mila.Desk account = one Amazon account (owner's request 2026-11-28): the storefront each
+  // account is linked to, and «Desligar» for someone who really changed Amazon accounts.
+  let amazonLinks = new Map();
+  // ⚠️ Pago fallido (owner's request 2026-11-28): the charge failed; Premium lasts 1 day after it
+  // and comes back by itself if Paddle charges later.
+  let subStates = new Map();
+  const failedPayment = r => subStates.get(r.user_id)?.status === 'past_due';
+  function failedTag(r) {
+    if (!failedPayment(r)) return '';
+    const until = Date.parse(subStates.get(r.user_id).access_until || '');
+    const text = Number.isFinite(until) && until > Date.now() ? `⚠️ Pago fallido · Premium hasta ${date(new Date(until).toISOString())}` : '⚠️ Pago fallido · sin Premium';
+    return ` <span class="tag warn" title="Paddle sigue intentando cobrar; si lo logra, Premium vuelve solo">${esc(text)}</span>`;
+  }
+  function amazonLinkCell(r) {
+    const l = amazonLinks.get(r.user_id);
+    if (!l) return '';
+    return `<div class="small">🛒 Amazon: ${esc(l.handle || 'ligada')} <button type="button" data-unlink="${esc(r.user_id)}" data-unlink-name="${esc(r.username || r.email)}" title="La próxima vez que use Mila.Desk se liga a la cuenta de Amazon que tenga abierta">Desligar</button></div>`;
+  }
+  async function unlinkAmazon(button) {
+    if (!confirm(`¿Desligar a ${button.dataset.unlinkName} de su cuenta de Amazon? La próxima vez que use Mila.Desk se liga a la cuenta de Amazon que tenga abierta.`)) return;
+    button.disabled = true;
+    try {
+      await rpc('admin_amazon_unlink', { p_user: button.dataset.unlink });
+      amazonLinks.delete(button.dataset.unlink);
+      $('signupMsg').textContent = `${button.dataset.unlinkName} quedó desligada de Amazon.`;
+      renderSignups();
+    } catch (error) { button.disabled = false; $('signupMsg').textContent = error.message; }
+  }
   async function loadSignups() {
     const msg = $('signupMsg');
     msg.textContent = '';
     try {
-      const [rows] = await Promise.all([rpc('admin_recent_signups', { p_limit: 500 }), loadMentors()]);
+      const [rows, links, subs] = await Promise.all([rpc('admin_recent_signups', { p_limit: 500 }), rpc('admin_amazon_links').catch(() => []), rpc('admin_subscription_states').catch(() => []), loadMentors()]);
+      subStates = new Map((Array.isArray(subs) ? subs : []).map(x => [x.user_id, x]));
       signups = Array.isArray(rows) ? rows : [];
+      amazonLinks = new Map((Array.isArray(links) ? links : []).map(l => [l.user_id, l]));
       renderSignups();
       if (grants.length) renderGrants(); // emails and mentors for the access list
     } catch (error) {
       $('signupRows').innerHTML = '<tr><td colspan="6" class="empty">No se pudieron cargar los registros.</td></tr>';
       msg.textContent = error.status === 404 ? 'Falta aplicar en la base de datos la función de registros.' : error.message;
     }
+  }
+  // 🟢 En línea (owner's request 2026-11-28): who has Mila.Desk open now and who used it today.
+  let presence = null, onlineView = 'ahora';
+  async function loadOnline() {
+    try { presence = await rpc('admin_presence'); $('onlineMsg').textContent = ''; }
+    catch (error) { presence = null; $('onlineMsg').textContent = error.status === 404 ? 'Falta aplicar en la base de datos la función de «En línea».' : error.message; }
+    renderOnline();
+  }
+  function renderOnline() {
+    const p = MilaCore.presenceSummary(Array.isArray(presence) ? presence : []);
+    $('onlineBadge').hidden = !p.onlineCount; $('onlineBadge').textContent = p.onlineCount;
+    $('onlineStats').innerHTML = [['ahora', p.onlineCount, 'en línea ahora'], ['hoy', p.todayCount, 'usaron Mila.Desk hoy']]
+      .map(([key, n, label]) => `<button type="button" class="stat ${onlineView === key ? 'on' : ''}" data-online="${key}"><b>${n}</b><span>${label}</span></button>`).join('');
+    const list = onlineView === 'ahora' ? p.online : p.today, onlineIds = new Set(p.online.map(r => r.user_id));
+    const ago = r => { const m = Math.round((Date.now() - r.at) / 60000); return m < 1 ? 'ahora' : m < 60 ? `hace ${m} min` : new Date(r.at).toLocaleTimeString('es-DO', { hour: 'numeric', minute: '2-digit' }); };
+    $('onlineList').innerHTML = list.length ? list.map(r => `<span class="${onlineIds.has(r.user_id) ? 'on' : ''}">${onlineIds.has(r.user_id) ? '🟢 ' : ''}${esc(r.username || 'Usuario sin nombre')}<small>${esc(ago(r))}${r.version ? ' · ' + esc(r.version) : ''}</small></span>`).join('')
+      : `<div class="empty">${onlineView === 'ahora' ? 'Nadie en línea en este momento.' : 'Nadie ha usado Mila.Desk hoy todavía.'}</div>`;
   }
   let signupView = 'hoy';
   function renderSignups() {
@@ -87,7 +134,8 @@
       // ends without paying the account falls to Gratis by itself, and paying brings it back (2026-11-24).
       premium: [hasAccess, 'plan premium'],
       sin_acceso: [r => !hasAccess(r), 'plan gratis'],
-      sin_confirmar: [r => !r.email_confirmed, 'sin confirmar el correo']
+      sin_confirmar: [r => !r.email_confirmed, 'sin confirmar el correo'],
+      pago_fallido: [failedPayment, 'con un pago fallido']
     };
     $('signupStats').innerHTML = Object.entries(views).map(([key, [fn, label]]) =>
       `<button type="button" class="stat${signupView === key ? ' on' : ''}" data-sview="${key}" aria-pressed="${signupView === key}"><b>${signups.filter(fn).length}</b><span>${label}</span></button>`).join('');
@@ -102,9 +150,9 @@
       const button = self ? '<span class="tag">Tú</span>' : hasAccess(r)
         ? `<button type="button" data-grant-email="${esc(r.email)}" data-grant-name="${esc(r.username || r.email)}">Cambiar fecha</button>`
         : `<button type="button" class="primary" data-grant-email="${esc(r.email)}" data-grant-name="${esc(r.username || r.email)}" data-grant-unconfirmed="${r.email_confirmed ? '' : '1'}">Dar acceso</button>`;
-      return `<tr><td><b>${esc(r.username || 'Sin usuario')}</b>${mentorTag(r.user_id)}</td><td class="small">${esc(r.email)}</td><td class="small">${esc(date(r.created_at))}</td>`
+      return `<tr><td><b>${esc(r.username || 'Sin usuario')}</b>${mentorTag(r.user_id)}${amazonLinkCell(r)}</td><td class="small">${esc(r.email)}</td><td class="small">${esc(date(r.created_at))}</td>`
         + `<td>${r.email_confirmed ? '<span class="tag ok">Confirmado</span>' : '<span class="tag warn">Pendiente</span>'}</td>`
-        + `<td>${hasAccess(r) ? `<span class="tag ok">${esc(accessText(r))}</span>` : '<span class="tag">Gratis</span>'}</td><td>${button}</td></tr>`;
+        + `<td>${hasAccess(r) ? `<span class="tag ok">${esc(accessText(r))}</span>` : '<span class="tag">Gratis</span>'}${failedTag(r)}</td><td>${button}</td></tr>`;
     }).join('') : `<tr><td colspan="6" class="empty">${q ? 'No hay cuentas que coincidan.' : signupView === 'hoy' ? 'Nadie se ha registrado hoy todavía. Toca otro número o busca arriba para ver cuentas de otros días.' : 'No hay cuentas en este grupo.'}</td></tr>`;
   }
   async function grantFromSignups(button) {
@@ -910,7 +958,8 @@
       if (admin !== true) throw new Error('Esta página es solo para administradores de Mila.Desk.');
       $('who').textContent = 'Solo tú ves esta página. Cada acción se comprueba también en la base de datos.';
       $('app').hidden = false; $('sectionsNav').hidden = false; $('earningsOpen').hidden = false;
-      await Promise.all([loadSignups(), loadAccess(), loadSamples(), loadKits(), loadFeedback(), loadEarnings()]);
+      await Promise.all([loadOnline(), loadSignups(), loadAccess(), loadSamples(), loadKits(), loadFeedback(), loadEarnings()]);
+      setInterval(() => { if (!document.hidden) loadOnline(); }, 60000);
     } catch (error) {
       $('who').textContent = '';
       $('locked').hidden = false;
@@ -922,7 +971,7 @@
   $('signupSearch').addEventListener('input', renderSignups);
   $('signupOnlyFree').addEventListener('change', renderSignups);
   $('signupStats').addEventListener('click', e => { const b = e.target.closest('[data-sview]'); if (b) { signupView = b.dataset.sview; renderSignups(); } });
-  $('signupRows').addEventListener('click', e => { const b = e.target.closest('[data-grant-email]'); if (b) grantFromSignups(b); });
+  $('signupRows').addEventListener('click', e => { const u = e.target.closest('[data-unlink]'); if (u) return unlinkAmazon(u); const b = e.target.closest('[data-grant-email]'); if (b) grantFromSignups(b); });
   $('accessRefresh').addEventListener('click', loadAccess);
   $('grantSearch').addEventListener('input', renderGrants);
   $('mentoras').addEventListener('click', e => { if (!e.target.closest('summary')) mentorClick(e); });
@@ -940,6 +989,8 @@
   $('codeCsv').addEventListener('click', downloadCsv);
   $('codePdf').addEventListener('click', () => printPdf(batch));
   $('accesos').addEventListener('click', e => { if (e.target.closest('#codeList,#grantList') && !e.target.closest('summary')) accessClick(e); });
+  $('onlineRefresh').addEventListener('click', loadOnline);
+  $('onlineStats').addEventListener('click', e => { const b = e.target.closest('[data-online]'); if (b) { onlineView = b.dataset.online; renderOnline(); } });
   $('earningsRefresh').addEventListener('click', async () => { await loadMentorPanel(); await loadEarnings(); });
   $('earningsOpen').addEventListener('click', () => showEarnings(true));
   $('earningsBack').addEventListener('click', () => showEarnings(false));

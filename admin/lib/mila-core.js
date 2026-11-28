@@ -1923,6 +1923,35 @@
       subscriptions:subs
     };
   }
+  // 🟢 En línea (owner's request 2026-11-28): who is using Mila.Desk now (seen in the last
+  // PRESENCE_ONLINE_MIN minutes; it says «still here» every PRESENCE_EVERY_MIN while open) and today.
+  const PRESENCE_EVERY_MIN=3, PRESENCE_ONLINE_MIN=6;
+  // One Mila.Desk account = one Amazon account (owner's request 2026-11-28). link is what
+  // amazon_link_check() answered; tr translates and fills {handle}. '' when nothing is blocked.
+  function amazonLinkMessage(link,tr=(x,v)=>String(x).replace(/\{(\w+)\}/g,(m,k)=>v?.[k]??m)){
+    const handle=String(link?.handle||"").trim();
+    if(link?.status==="other") return handle
+      ?tr("Esta cuenta de Mila.Desk está ligada a otra cuenta de Amazon ({handle}). Entra en Amazon con esa cuenta para usarla. Si cambiaste de cuenta de Amazon, escríbenos a milanes@mila-desk.com.",{handle})
+      :tr("Esta cuenta de Mila.Desk está ligada a otra cuenta de Amazon. Entra en Amazon con esa cuenta para usarla. Si cambiaste de cuenta de Amazon, escríbenos a milanes@mila-desk.com.");
+    if(link?.status==="taken") return handle
+      ?tr("Esta cuenta de Amazon ({handle}) ya está ligada a otra cuenta de Mila.Desk. Cierra sesión y entra con esa cuenta. Si es un error, escríbenos a milanes@mila-desk.com.",{handle})
+      :tr("Esta cuenta de Amazon ya está ligada a otra cuenta de Mila.Desk. Cierra sesión y entra con esa cuenta. Si es un error, escríbenos a milanes@mila-desk.com.");
+    return "";
+  }
+  function presenceSummary(rows,now=Date.now()){
+    const day=new Date(now); day.setHours(0,0,0,0);
+    const seen=(rows||[]).map(r=>({...r,at:Date.parse(r?.last_seen_at||"")})).filter(r=>Number.isFinite(r.at)&&r.at<=now+60000).sort((a,b)=>b.at-a.at);
+    const online=seen.filter(r=>now-r.at<=PRESENCE_ONLINE_MIN*60000);
+    const today=seen.filter(r=>r.at>=day.getTime());
+    return {online,today,onlineCount:online.length,todayCount:today.length};
+  }
+  // Pages of the extension call this once: «still here» now, every few minutes and when the tab
+  // comes back, only while it is visible. The service worker sends it (MILA_PRESENCE).
+  function presenceStart(){
+    if(typeof document==="undefined"||!globalThis.chrome?.runtime?.sendMessage) return;
+    const ping=()=>{ if(document.hidden) return; try{ Promise.resolve(chrome.runtime.sendMessage({type:"MILA_PRESENCE"})).catch(()=>{}); }catch{} };
+    ping(); setInterval(ping,PRESENCE_EVERY_MIN*60000); document.addEventListener("visibilitychange",ping);
+  }
   // CSV of the payments for the accountant (dates in UTC, amounts in USD).
   function earningsCsv(payments){
     const q=v=>{ let t=String(v??""); if(/^[=+\-@]/.test(t)) t="'"+t; // no spreadsheet formulas from labels
@@ -2692,7 +2721,7 @@
   const PINTEREST_SOON=true;
   root.MilaCore=Object.freeze({
     PINTEREST_SOON,
-    RELEASE_NOTES,compareVersions,releaseNotesSince,releaseNoteParts,creatorHandleFromHtml,isDefaultCreatorHandle,storefrontNameFromHtml,buildTasks,TASK_DONE_STAGES,tasksShareText,ORDER_FILTERS,ordersPageUrl,mergeOrderItems,presenceAdd,presenceStats,presenceText,presenceSplit,presenceChangeText,titleLogUpdate,productAvailabilityFromHtml,productBulletsFromHtml,asinByImageFromSearchHtml,storeReviewGroups,MEDIA_KIT_NETWORKS,MEDIA_KIT_MAX_VIDEOS,storefrontPhotoFromHtml,mediaKitSlug,isMediaKitSlug,cleanMediaKit,mediaKitStats,videoHlsFromHtml,storefrontVideoItems,hlsBestVariant,hlsSegments,videoFileName,MEDIA_KIT_PROOF_TYPES,MEDIA_KIT_PROOF_MAX,mediaKitProofType,TASK_SHARE_SECTIONS,watchLevel,watchedCampaign,campaignAcceptBody,
+    RELEASE_NOTES,compareVersions,PRESENCE_EVERY_MIN,PRESENCE_ONLINE_MIN,presenceSummary,presenceStart,amazonLinkMessage,releaseNotesSince,releaseNoteParts,creatorHandleFromHtml,isDefaultCreatorHandle,storefrontNameFromHtml,buildTasks,TASK_DONE_STAGES,tasksShareText,ORDER_FILTERS,ordersPageUrl,mergeOrderItems,presenceAdd,presenceStats,presenceText,presenceSplit,presenceChangeText,titleLogUpdate,productAvailabilityFromHtml,productBulletsFromHtml,asinByImageFromSearchHtml,storeReviewGroups,MEDIA_KIT_NETWORKS,MEDIA_KIT_MAX_VIDEOS,storefrontPhotoFromHtml,mediaKitSlug,isMediaKitSlug,cleanMediaKit,mediaKitStats,videoHlsFromHtml,storefrontVideoItems,hlsBestVariant,hlsSegments,videoFileName,MEDIA_KIT_PROOF_TYPES,MEDIA_KIT_PROOF_MAX,mediaKitProofType,TASK_SHARE_SECTIONS,watchLevel,watchedCampaign,campaignAcceptBody,
     decodeBase64Loose,extractEntityId,conversationStorageKey,analyzeContextToken,summarizeKeyDiagnostics,
     buildEntityKeyMap,resolveStorageKey,dedupeResultsByEntity,mergeCloudAndLocalResults,
     lastMessageIso,buildEntityIndex,needsAnalysis,groupRowsByColumns,runPool,

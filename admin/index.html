@@ -51,6 +51,7 @@ h3{margin:0 0 8px;font-size:13px;color:var(--m);text-transform:uppercase;letter-
 .alert{border-radius:9px;padding:8px 11px;margin:8px 0;font-size:13px;background:#1b1b1b;border:1px solid #333}.alert.warn{border-color:#7a4b12;color:#fbbf24}.alert.ok{border-color:#1f6b3a;color:#4ade80}div.mentor .grid2{margin-top:10px}#app.mentor-view>section:not(#mentoras){display:none}#app.mentor-view #mentoras>.head{display:none}div.mentor textarea{width:100%;background:#0b0b0b;color:var(--w);border:1px solid #333;border-radius:9px;padding:9px;font:inherit;font-size:13px;resize:vertical}details.group{background:#111;border:1px solid #262626;border-radius:11px;padding:11px 13px}details.group summary{cursor:pointer;font-weight:800}details.group summary small{color:var(--m);font-weight:600;margin-left:6px}details.group .list{margin-top:8px}
 .msg{min-height:18px;font-size:12.5px;color:#ffb37a;margin-top:8px}
 .empty{color:var(--m);padding:18px;text-align:center;font-size:13px}
+.online-list{display:flex;flex-wrap:wrap;gap:8px}.online-list span{background:var(--b3);border:1px solid var(--l);border-radius:999px;padding:6px 12px;font-size:12.5px}.online-list span.on{border-color:rgba(74,222,128,.5)}.online-list small{color:var(--m);margin-left:6px}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .card{background:#111;border:1px solid #262626;border-radius:12px;padding:13px}
 .card .label{color:var(--m);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-top:8px}
@@ -126,13 +127,21 @@ button:active,[role="button"]:active,a.btn:active,.btn:active{transform:scale(.9
 <main>
 <header>
   <div><h1>Mila.Desk · <span>Administración</span></h1><div class="sub" id="who">Comprobando tu acceso…</div></div>
-  <nav id="sectionsNav" hidden><a href="#registros">Registros</a><a href="#accesos">Accesos</a><a href="#mentoras">Afiliadas</a><a href="#muestras">Free Samples</a><a href="#kits">Media kits <span id="kitBadge" class="tag warn" hidden></span></a><a href="#sugerencias">Sugerencias <span id="feedbackNewBadge" class="tag warn" hidden></span></a></nav>
+  <nav id="sectionsNav" hidden><a href="#enlinea">🟢 En línea <span id="onlineBadge" class="tag ok" hidden></span></a><a href="#registros">Registros</a><a href="#accesos">Accesos</a><a href="#mentoras">Afiliadas</a><a href="#muestras">Free Samples</a><a href="#kits">Media kits <span id="kitBadge" class="tag warn" hidden></span></a><a href="#sugerencias">Sugerencias <span id="feedbackNewBadge" class="tag warn" hidden></span></a></nav>
   <button id="earningsOpen" type="button" class="eg-open" hidden>💰 Ganancias</button>
 </header>
 
 <div id="locked" class="locked" hidden></div>
 
 <div id="app" hidden>
+<section id="enlinea">
+  <div class="head"><div><h2>🟢 En línea</h2><div class="hint">Quién tiene Mila.Desk abierto ahora (Amazon con la extensión, la ventanita o una herramienta del Kit) y quién lo usó hoy. Se actualiza solo cada minuto. Solo cuenta a quien ya tiene la versión 25.54.1 o más nueva.</div></div>
+    <button id="onlineRefresh" type="button">↻ Actualizar</button></div>
+  <div class="stats" id="onlineStats"></div>
+  <div class="online-list" id="onlineList"></div>
+  <div class="hint" id="onlineMsg"></div>
+</section>
+
 <section id="registros">
   <div class="head"><div><h2>Registros recientes</h2><div class="hint">Aquí salen las cuentas que se registraron hoy. Para ver otros días, busca por usuario o correo. Dar acceso usa el correo de la cuenta.</div></div>
     <div class="row"><label class="hint">Acceso hasta <input id="signupUntil" type="date"></label><button id="signupsRefresh" type="button">↻ Actualizar</button></div></div>
