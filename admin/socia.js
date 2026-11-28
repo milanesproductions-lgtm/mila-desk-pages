@@ -10,13 +10,14 @@
   const usd = c => '$' + ((Number(c) || 0) / 100).toFixed(2);
   const day = iso => iso ? new Date(iso).toLocaleDateString('es-DO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
   const monthName = key => new Date(`${key}-15T12:00:00`).toLocaleDateString('es-DO', { month: 'long', year: 'numeric' });
-  const STATE = { pagando: ['Pagando (con suscripción)', 'ok'], gratis: ['Periodo gratis', 'warn'], sin_pagar: ['Terminó sin pagar', ''], cancelo: ['Canceló', 'bad'], otro_acceso: ['Otro acceso', ''] };
+  const STATE = { pagando: ['Pagando (con suscripción)', 'ok'], gratis: ['Periodo gratis', 'warn'], sin_tarjeta: ['Falta poner la tarjeta', 'warn'], sin_pagar: ['Terminó sin pagar', ''], cancelo: ['Canceló', 'bad'], otro_acceso: ['Otro acceso', ''] };
   const TYPE = { mensual: 'Mensual', anual: 'Anual', primero: 'Primer pago (mensual)', primero_anual: 'Primer pago (anual)' };
   let data = null, filter = '';
   // «Mis códigos» (owner's request 2026-11-25): its own screen; 5 codes per group until «Mostrar todos»;
-  // a copied code waits to be marked as sent, and sent ones go to the end of the list.
+  // copying a code marks it as given (owner's request 2026-11-28: crossed out, at the end, with
+  // «Volver a disponible» in case the person never used it).
   let codesView = false;
-  const expanded = new Set(), copied = new Set(), PAGE = 5;
+  const expanded = new Set(), PAGE = 5;
   // Admin preview (owner's request, 2026-11-21): socia.html?socia=<name> shows that partner's panel
   // exactly as she sees it; admin_partner_panel() answers only to an admin.
   const preview = new URLSearchParams(location.search).get('socia') || '';
@@ -136,15 +137,15 @@
       .map(([n, t]) => `<div class="stat"><b>${n}</b><span>${t}</span></div>`).join('');
     const sentDay = iso => new Date(iso).toLocaleDateString('es-DO', { day: 'numeric', month: 'short' });
     const codeRow = x => {
-      const sent = !!x.sent_at, cp = !sent && copied.has(x.code), code = esc(x.code);
-      return `<div class="crow ${sent ? 'sent' : cp ? 'copied' : ''}"><code>${code}</code>${sent ? `<span class="tag ok">Enviado · ${sentDay(x.sent_at)}</span>` : cp ? '<span class="tag warn">Copiado</span>' : ''}<div class="actions noprint">${sent
-        ? (preview ? '' : `<button type="button" data-unsend="${code}">Deshacer</button>`)
-        : `<button type="button" data-copy="${code}">${cp ? 'Copiar otra vez' : 'Copiar'}</button>${cp && !preview ? `<button type="button" class="primary" data-send="${code}">Marcar como enviado</button>` : ''}`}</div></div>`;
+      const sent = !!x.sent_at, code = esc(x.code);
+      return `<div class="crow ${sent ? 'sent' : ''}"><code>${code}</code>${sent ? `<span class="tag ok">Copiado · ${sentDay(x.sent_at)}</span>` : ''}<div class="actions noprint">${sent
+        ? `<button type="button" data-copy="${code}">Copiar otra vez</button><button type="button" data-unsend="${code}">↩ Volver a disponible</button>`
+        : `<button type="button" class="primary" data-copy="${code}">Copiar</button>`}</div></div>`;
     };
     const group = (key, list, title) => {
       const sorted = list.filter(x => !x.sent_at).concat(list.filter(x => x.sent_at).sort((a, b) => Date.parse(a.sent_at) - Date.parse(b.sent_at)));
       const open = expanded.has(key), waiting = list.length - list.filter(x => x.sent_at).length;
-      return `<div class="group-title"><h3>${title}</h3><span class="hint" style="margin:0">${waiting} sin enviar · ${list.length - waiting} enviados</span></div>`
+      return `<div class="group-title"><h3>${title}</h3><span class="hint" style="margin:0">${waiting} disponibles · ${list.length - waiting} ya copiados</span></div>`
         + `<div class="clist">${(open ? sorted : sorted.slice(0, PAGE)).map(codeRow).join('')}</div>`
         + (sorted.length > PAGE ? `<button type="button" class="more noprint" data-more="${key}">${open ? 'Mostrar menos' : `Mostrar todos (${sorted.length})`}</button>` : '');
     };
@@ -162,28 +163,39 @@
     if (b.dataset.filter !== undefined) { filter = b.dataset.filter; render(); return; }
     if (b.id === 'openCodes' || b.id === 'closeCodes') { codesView = b.id === 'openCodes'; render(); window.scrollTo(0, 0); return; }
     if (b.dataset.more) { expanded.has(b.dataset.more) ? expanded.delete(b.dataset.more) : expanded.add(b.dataset.more); render(); return; }
+    let send = false, unsend = !!b.dataset.unsend, copyFailed = false;
     if (b.dataset.copy) {
-      let ok = true;
-      try { await navigator.clipboard.writeText(b.dataset.copy); } catch { ok = false; }
-      // Even if the browser refused, she can copy it by hand and still mark it as sent.
-      copied.add(b.dataset.copy); render();
-      if (!ok) $('copyMsg').textContent = 'No se pudo copiar solo. Mantén presionado el código para copiarlo.';
+      try { await navigator.clipboard.writeText(b.dataset.copy); } catch { copyFailed = true; }
+      const hand = 'No se pudo copiar solo. Mantén presionado el código para copiarlo.';
+      // Copied = given: it goes crossed out to the end.
+      const item = (data.codes || []).find(x => x.code === b.dataset.copy);
+      if (item?.sent_at) { $('copyMsg').textContent = copyFailed ? hand : `Copiado: ${b.dataset.copy}`; return; }
+      send = true;
+    }
+    const code = b.dataset.copy || b.dataset.unsend;
+    // Admin preview: shows how it works on this screen only; her real list does not change.
+    if (preview && code) {
+      const item = (data.codes || []).find(x => x.code === code);
+      if (item) item.sent_at = send ? new Date().toISOString() : null;
+      render();
+      $('copyMsg').textContent = `${unsend ? `${code} está disponible otra vez.` : `Copiado: ${code}. Quedó tachado al final de la lista.`} (Vista de administración: solo en tu pantalla, a ella no le cambia nada.)`;
       return;
     }
-    const code = b.dataset.send || b.dataset.unsend;
-    if (code) {
+    if (code && (send || unsend)) {
       b.disabled = true;
       try {
         const c = await connection();
         const res = await fetch(`${c.url}/rest/v1/rpc/partner_mark_code_sent`, {
           method: 'POST', headers: { apikey: c.key, Authorization: `Bearer ${c.token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ p_code: code, p_sent: !!b.dataset.send })
+          body: JSON.stringify({ p_code: code, p_sent: send })
         });
         if (!res.ok) throw new Error();
         const item = (data.codes || []).find(x => x.code === code);
         if (item) item.sent_at = await res.json();
-        copied.delete(code);
         render();
+        $('copyMsg').textContent = unsend ? `${code} está disponible otra vez.`
+          : copyFailed ? `No se pudo copiar solo: mantén presionado ${code} para copiarlo. Quedó tachado al final de la lista.`
+          : `Copiado: ${code}. Quedó tachado al final de la lista.`;
       } catch { b.disabled = false; $('copyMsg').textContent = 'No se pudo guardar. Revisa tu conexión y vuelve a intentarlo.'; }
     }
   });

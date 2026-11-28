@@ -45,7 +45,7 @@ td.small{color:var(--m);font-size:12px}
 .clist{display:grid;gap:6px;margin-top:8px}
 .crow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#111;border:1px solid #262626;border-radius:10px;padding:9px 12px}
 .crow code{font:14px ui-monospace,Menlo,monospace;font-weight:700;flex:1;min-width:140px}
-.crow.copied{border-color:var(--o)}.crow.copied code{opacity:.45}
+
 .crow.sent code{opacity:.4;text-decoration:line-through}.crow.sent{background:#0e0e0e}
 .crow .actions{display:flex;gap:6px;flex-wrap:wrap}.crow button{padding:7px 11px}
 .more{width:100%;margin-top:8px;background:#111}
@@ -112,7 +112,7 @@ button:active,[role="button"]:active,a.btn:active,.btn:active{transform:scale(.9
     <section id="codesSection">
       <button type="button" class="back noprint" id="closeCodes">← Volver a tu panel</button>
       <h2>Tus códigos</h2>
-      <p class="hint">Copia un código, envíaselo a tu alumna y márcalo como enviado: así sabes cuáles ya diste. Cuando alguien lo canjea, desaparece solo. Si necesitas más códigos, pídeselos a Mila.Desk.</p>
+      <p class="hint">Copia un código y envíaselo a tu alumna: al copiarlo queda tachado al final de la lista, para que sepas cuáles ya diste. Cuando alguien lo canjea, desaparece solo. Si la persona no lo usó, toca «↩ Volver a disponible» y queda libre otra vez. Si necesitas más códigos, pídeselos a Mila.Desk.</p>
       <div class="stats" id="codeStats"></div>
       <div id="codes"></div>
     </section>

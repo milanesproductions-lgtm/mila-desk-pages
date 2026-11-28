@@ -575,6 +575,63 @@
     return {ids,checks};
   }
 
+  // 📊 How often a video shows (owner's request 2026-11-27): some videos show on almost every visit,
+  // others only now and then, and «it showed once» hid that. Each look at the product page adds
+  // {at, gc, gh, cc, ch}: gallery and carousel requests made and whether the video was in one
+  // (0/1: a look stops when it appears). Requests until the first appearance estimate the rate
+  // without bias (hits / requests). Kept 30 days, at most 60 looks per video and product.
+  const PRESENCE_DAYS=30;
+  function presenceAdd(list,sample,now=Date.now()){
+    const keep=(Array.isArray(list)?list:[]).filter(s=>s&&now-Number(s.at)<PRESENCE_DAYS*864e5);
+    const n=v=>Math.max(0,Math.min(40,Math.round(Number(v)||0)));
+    // A normal look stops when the video appears (hits 0/1); «Revisar a fondo» counts every request.
+    const hit=(h,c)=>Math.min(c,h===true?1:n(h));
+    const s={at:now,gc:n(sample?.gc),cc:n(sample?.cc)}; s.gh=hit(sample?.gh,s.gc); s.ch=hit(sample?.ch,s.cc);
+    if(s.gc||s.cc) keep.push(s);
+    return keep.slice(-60);
+  }
+  // → {looks, rate (0–1, per visit: gallery or carousel), outOf10, level: strong|intermittent|weak|few}
+  function presenceStats(list,now=Date.now()){
+    const looks=(Array.isArray(list)?list:[]).filter(s=>s&&now-Number(s.at)<PRESENCE_DAYS*864e5);
+    const sum=k=>looks.reduce((t,s)=>t+(Number(s[k])||0),0);
+    const gc=sum("gc"),gh=sum("gh"),cc=sum("cc"),ch=sum("ch");
+    const pg=gc?gh/gc:0, pc=cc?ch/cc:0;
+    const rate=gc||cc?1-(1-pg)*(1-pc):null;
+    const level=looks.length<3||rate==null?"few":rate>=0.6?"strong":rate>=0.3?"intermittent":"weak";
+    return {looks:looks.length,rate,outOf10:rate==null?null:Math.round(rate*10),level};
+  }
+
+  // Before and after she changed the title (owner's request 2026-11-27): titles seen in her video
+  // list, with the date Mila.Desk first saw a new one. → new log {aci: {title, changedAt}}.
+  function titleLogUpdate(log,videos,now=Date.now()){
+    const out={...(log&&typeof log==="object"?log:{})};
+    for(const v of videos||[]){
+      const title=String(v?.title||"").trim().slice(0,300), aci=String(v?.aci||"");
+      if(!aci||!title) continue;
+      const old=out[aci];
+      out[aci]=!old?{title,changedAt:null}:old.title!==title?{title,changedAt:now,before:old.title.slice(0,120)}:old;
+    }
+    return out;
+  }
+  // Looks before and after a date → {before, after} stats («few» when there are not enough).
+  function presenceSplit(list,at,now=Date.now()){
+    const l=Array.isArray(list)?list:[];
+    return {before:presenceStats(l.filter(s=>Number(s.at)<at),now),after:presenceStats(l.filter(s=>Number(s.at)>=at),now)};
+  }
+  function presenceChangeText(split,changedAt,now=Date.now()){
+    if(!split||!changedAt) return "";
+    const days=Math.max(0,Math.floor((now-changedAt)/864e5));
+    const n=st=>st.level==="few"?tr("todavía pocos datos"):tr("{n} de cada 10",{n:st.outOf10});
+    return tr("Cambiaste el título hace {d} días. Antes salía: {before}. Desde el cambio: {after}.",{d:days,before:n(split.before),after:n(split.after)});
+  }
+  function presenceText(st){
+    if(!st) return "";
+    const looks=tr(Number(st.looks)===1?"{n} revisión":"{n} revisiones",{n:st.looks});
+    if(st.level==="few") return tr("Pocos datos para saber cuántas veces sale ({looks} en 30 días).",{looks});
+    const name={strong:tr("se mantiene"),intermittent:tr("sale a ratos"),weak:tr("sale poco")}[st.level];
+    return tr("Sale en {n} de cada 10 visitas: {name} ({looks} en 30 días).",{n:st.outOf10,name,looks});
+  }
+
   // gallery: ordered ids or null when Amazon did not return the gallery.
   function computeVideoPlacement({aci,gallery,carousel,galleryChecks=1,carouselChecks=1}={}){
     const galleryKnown=Array.isArray(gallery);
@@ -1206,11 +1263,15 @@
       if(p===undefined){ waiting=true; continue; }
       if(!p) continue;
       const who=asins.length>1?asin+": ":"";
+      if(p.change) add("Título","nota",who+p.change);
       if(p.listed===false){ add("Ubicación","leve",tr("{who}Amazon no encontró la página de este producto.",{who})); continue; }
       if(p.topIndex||p.carouselIndex){
         placed++; checked++;
-        add("Ubicación","bien",p.topIndex&&p.carouselIndex?tr("{who}Se muestra en la galería de arriba y en el carrusel.",{who})
-          :p.topIndex?tr("{who}Se muestra en la galería de arriba.",{who}):tr("{who}Se muestra en el carrusel de videos.",{who}));
+        const st=p.presence;
+        if(st&&(st.level==="weak"||st.level==="intermittent")) add("Ubicación","leve",who+presenceText(st)+" "+tr("Un título o una portada mejores pueden ayudar a que salga más seguido."));
+        const extra=(st&&(st.level==="strong"||st.level==="few")?" "+presenceText(st):"");
+        add("Ubicación","bien",(p.topIndex&&p.carouselIndex?tr("{who}Se muestra en la galería de arriba y en el carrusel.",{who})
+          :p.topIndex?tr("{who}Se muestra en la galería de arriba.",{who}):tr("{who}Se muestra en el carrusel de videos.",{who}))+extra);
       } else if(p.position==="NEITHER"){ checked++; missing.push({asin,total:Number(p.carouselTotal)||0}); }
     }
     if(missing.length){
@@ -1465,6 +1526,74 @@
     }
     return [...byBrand.values()];
   }
+  // 🖼️ Product photo and title for each brand in Mensajes a marcas (owner's request 2026-11-26).
+  // Same request Amazon's own opportunities page sends to /connect/api/collaboration/asin/info,
+  // seen read-only on 2026-11-26: {asinsByMarketplaceId:{<marketplace>:[asins]}, storeId, locale}.
+  // 114 ASINs answered in one call. The answer is responses[0].asinToAsinInfoMap[asin].
+  function asinInfoBody(asins,marketplaceId,storeId,locale){
+    const list=[...new Set((asins||[]).filter(a=>/^[A-Z0-9]{10}$/.test(String(a))))].slice(0,150);
+    const market=/^[A-Z0-9]{5,20}$/.test(String(marketplaceId||""))?String(marketplaceId):"ATVPDKIKX0DER";
+    return list.length&&storeId?{asinsByMarketplaceId:{[market]:list},storeId:String(storeId),locale:locale==="en_US"?"en_US":"es_US"}:null;
+  }
+  // Amazon's answer is untrusted: only a plain image id becomes a URL on Amazon's image host.
+  function asinInfoProducts(raw){
+    const map=raw?.responses?.[0]?.asinToAsinInfoMap, out={};
+    if(!map||typeof map!=="object") return out;
+    for(const [asin,info] of Object.entries(map)){
+      if(!/^[A-Z0-9]{10}$/.test(asin)) continue;
+      const id=String(info?.asinImage?.physicalId||""), ext=String(info?.asinImage?.extension||"jpg").toLowerCase();
+      out[asin]={
+        image:/^[A-Za-z0-9+%_-]{5,60}$/.test(id)&&/^(jpg|jpeg|png|webp)$/.test(ext)?`https://m.media-amazon.com/images/I/${id}._SL200_.${ext}`:"",
+        title:String(info?.title||"").replace(/[\u0000-\u001f]/g,"").trim().slice(0,200)
+      };
+    }
+    return out;
+  }
+  // 📌 Pinterest (owner's request 2026-11-26). The pin's link is the creator's own affiliate
+  // link: the product with her store tag (her Associates store id, e.g. «name-20»).
+  function affiliateLink(asin,tag){
+    if(!/^[A-Z0-9]{10}$/.test(String(asin||""))) return "";
+    return `https://www.amazon.com/dp/${asin}`+(/^[A-Za-z0-9][A-Za-z0-9-]{1,40}-2\d$/.test(String(tag||""))?`?tag=${tag}`:"");
+  }
+  // The product of a pin made from the creator's own video: an ASIN or an Amazon product link.
+  function asinFromText(text){
+    const s=String(text||"").trim();
+    if(/^[A-Z0-9]{10}$/i.test(s)) return s.toUpperCase();
+    const m=s.match(/^https?:\/\/(?:www\.|smile\.)?amazon\.com\/(?:[^?#]*\/)?(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})(?:[/?#]|$)/i);
+    return m?m[1].toUpperCase():"";
+  }
+  // A product title as people say it: up to the first «,», «|», « - », «(»… and at most max letters.
+  function shortProductName(title,max=60){
+    let s=String(title||"").replace(/\s+/g," ").trim().split(/\s*(?:[,|(\[]|\s[-–—:]\s)\s*/)[0].trim();
+    if(s.length>max){ s=s.slice(0,max+1); s=s.slice(0,Math.max(s.lastIndexOf(" "),Math.floor(max*.6))).trim(); }
+    return s;
+  }
+  // Title (Pinterest: 100), the big words on the image and the description (Pinterest: 500)
+  // with the disclosure Amazon asks of its associates. mode "video" talks about the video.
+  // variant 0-2: other words for another pin of the same product (Pinterest favors fresh pins).
+  function pinTexts({product="",brand="",lang="es",mode="image",variant=0}={}){
+    const name=shortProductName(product)||String(brand||"").trim()||(lang==="en"?"Amazon find":"Hallazgo de Amazon");
+    const b=String(brand||"").replace(/\s+/g," ").trim().slice(0,40);
+    const withBrand=b&&!name.toLowerCase().includes(b.toLowerCase())?(lang==="en"?`${name} by ${b}`:`${name} de ${b}`):name;
+    const tag=b.replace(/[^A-Za-z0-9]/g,"");
+    const tags=(lang==="en"?["#amazonfinds","#amazonmusthaves","#founditonamazon"]:["#amazonfinds","#hallazgosdeamazon","#amazonmusthaves"])
+      .concat(tag.length>=3&&tag.length<=30?["#"+tag.toLowerCase()]:[]);
+    const call=lang==="en"
+      ?(mode==="video"?"Watch the video and tap the pin to see it on Amazon. 🛒":"Tap the pin to see it on Amazon. 🛒")
+      :(mode==="video"?"Mira el video y toca el pin para verlo en Amazon. 🛒":"Toca el pin para verlo en Amazon. 🛒");
+    const disclosure=lang==="en"?"As an Amazon Associate I earn from qualifying purchases.":"Como afiliada de Amazon, gano con las compras que califican.";
+    const v=((Number(variant)||0)%3+3)%3, en=lang==="en";
+    const title=[withBrand, en?`${withBrand}: my Amazon find`:`${withBrand}: mi hallazgo de Amazon`, en?`Worth it: ${withBrand}`:`Vale la pena: ${withBrand}`][v];
+    const headline=[shortProductName(name,34), en?"My Amazon find":"Mi hallazgo de Amazon", en?"Have you seen this?":"¿Ya lo conocías?"][v];
+    const opener=["", en?"I found it on Amazon. ":"Lo encontré en Amazon. ", en?"Worth a look. ":"Vale la pena verlo. "][v];
+    return {
+      title:title.slice(0,100),
+      headline,
+      description:`${opener}${withBrand}. ${call}\n\n${tags.join(" ")}\n\n${disclosure}`.slice(0,500),
+      // Pinterest's alt text: what the picture is, for screen readers and search.
+      alt:(mode==="video"?(en?`Video about ${withBrand}`:`Video sobre ${withBrand}`):(en?`Picture of ${withBrand}`:`Imagen de ${withBrand}`)).slice(0,500)
+    };
+  }
   // What the creator already has with a brand, most important first: a collaboration, a
   // reply, a message sent from this page, a message of theirs in the analysis, or nothing.
   // Only "new" brands are ticked by default.
@@ -1505,6 +1634,11 @@
   function storefrontVideoUrl(handle,aci){
     return /^[A-Za-z0-9._-]{1,80}$/.test(String(handle||""))&&/^amzn1\.vse\.video\.[a-f0-9]{32}$/i.test(String(aci||""))
       ?`https://www.amazon.com/shop/${handle}/video/${aci}`:"";
+  }
+  // Amazon's own edit page for one video (seen 2026-11-27: «Administrar» opens /creatorhub/video/<hex>).
+  function creatorEditUrl(aci){
+    const hex=(String(aci||"").match(/^amzn1\.vse\.video\.([a-f0-9]{32})$/i)||[])[1];
+    return hex?`https://www.amazon.com/creatorhub/video/${hex.toLowerCase()}`:"";
   }
   const isStorefrontVideoUrl=url=>/^https:\/\/www\.amazon\.com\/shop\/[A-Za-z0-9._-]{1,80}\/video\/amzn1\.vse\.video\.[a-f0-9]{32}$/i.test(String(url||""));
   // Accepted campaigns with no content yet that one of the creator's videos (newest first)
@@ -1660,6 +1794,8 @@
   // cancelo: had a subscription that ended; gratis: the code's free month is still running;
   // otro_acceso: has a gift or Premium given by an administrator, without a subscription;
   // sin_pagar: the free month ended and no subscription followed.
+  // sin_tarjeta: redeemed a code that asks for a card, but hasn't put the card yet (owner's
+  // request 2026-11-27: she was shown as «Terminó sin pagar»); only card codes give no plan.
   function mentorStudentState(row,now=Date.now()){
     const status=String(row?.sub_status||""), access=String(row?.sub_access||"");
     if(status){
@@ -1668,6 +1804,7 @@
       if(access==="active"&&(status==="active"||status==="past_due")) return "pagando";
       return "cancelo";
     }
+    if(!row?.plan) return "sin_tarjeta";
     const until=Date.parse(row?.plan_expires_at||""), running=!Number.isFinite(until)||until>now;
     if(row?.plan==="beta"&&running) return "gratis";
     // A gift or Premium you gave by hand (for example, the mentor herself): not a student who stopped.
@@ -1692,7 +1829,7 @@
   function mentorSummary({codes=[],students=[],mentor=null,now=Date.now(),kind="mentora",firstPaidAt=null}={}){
     const influencer=kind==="influencer", months=influencer?3:MENTOR_MONTHS;
     if(kind==="mila"){ mentor=null; firstPaidAt=null; }
-    const count={gratis:0,pagando:0,cancelo:0,sin_pagar:0,otro_acceso:0};
+    const count={gratis:0,pagando:0,cancelo:0,sin_pagar:0,sin_tarjeta:0,otro_acceso:0};
     for(const s of students||[]) count[mentorStudentState(s,now)]++;
     const used=(codes||[]).filter(c=>Number(c?.uses)>0).length;
     const alerts=[];
@@ -1738,7 +1875,7 @@
   // 💰 Ganancias (owner, 2026-11-24): totals, months, where the money comes from and subscriptions.
   // payments: billing_payments rows with source (partner group or null); refunds carry positive
   // amounts. partners: [{name,kind}]; commissions: {earnedCents,paidCents,owedCents} already summed.
-  function earningsSummary({payments=[],subscriptions=[],partners=[],commissions=null,now=Date.now()}={}){
+  function earningsSummary({payments=[],subscriptions=[],partners=[],commissions=null,grants=[],now=Date.now()}={}){
     const paid=p=>p?.kind==="charge"&&["completed","paid"].includes(p.status);
     const refund=p=>p?.kind==="refund"&&p.status==="approved";
     const n=v=>Number(v)||0, month=p=>String(p.occurred_at||"").slice(0,7);
@@ -1760,17 +1897,24 @@
     }
     const keep=t=>t.netCents-t.refundNetCents;
     const out=t=>({...t,keepCents:keep(t)});
-    const subs={active:0,trial:0,monthly:0,annual:0,canceledThisMonth:0,pastDue:0};
+    const subs={active:0,trial:0,trialAnnual:0,monthly:0,annual:0,canceledThisMonth:0,pastDue:0};
+    const yearly=s=>/year|anual/i.test(String(s?.product||""));
     const thisMonth=new Date(now).toISOString().slice(0,7);
     for(const s of subscriptions||[]){
       if(s?.provider&&s.provider!=="paddle") continue;
-      if(s?.status==="on_trial"&&s.access==="active") subs.trial++;
-      else if(s?.status==="active"){ subs.active++; if(/year|anual/i.test(String(s.product||""))) subs.annual++; else subs.monthly++; }
+      if(s?.status==="on_trial"&&s.access==="active"){ subs.trial++; if(yearly(s)) subs.trialAnnual++; }
+      else if(s?.status==="active"){ subs.active++; if(yearly(s)) subs.annual++; else subs.monthly++; }
       else if(s?.status==="past_due") subs.pastDue++;
       if(s?.status==="canceled"&&String(s.updated_at||"").slice(0,7)===thisMonth) subs.canceledThisMonth++;
     }
     // shortcut: fixed income uses list prices (20 USD a month, 180 USD a year); read each subscription's price if discounts become common.
     subs.recurringCents=subs.monthly*2000+Math.round(subs.annual*18000/12);
+    // 🔮 If every free trial paid (owner, 2026-11-28): card trials at their plan's price, and people
+    // in a code's free month (plan beta with an end date; gifts never count) at the monthly price.
+    subs.trialCents=(subs.trial-subs.trialAnnual)*2000+Math.round(subs.trialAnnual*18000/12);
+    subs.freeTrial=(grants||[]).filter(g=>g?.plan==="beta"&&Date.parse(g.expires_at||"")>now).length;
+    subs.freeTrialCents=subs.freeTrial*2000;
+    subs.potentialCents=subs.recurringCents+subs.trialCents+subs.freeTrialCents;
     const total=out(totals), c=commissions||{earnedCents:0,paidCents:0,owedCents:0};
     return {
       totals:{...total,commissionCents:c.earnedCents,commissionPaidCents:c.paidCents,commissionOwedCents:c.owedCents,realCents:total.keepCents-c.earnedCents},
@@ -2286,6 +2430,24 @@
     const title=((s.match(/id="productTitle"[^>]*>\s*([^<]+)/)||[])[1]||"").trim().slice(0,300);
     return {unavailable,title};
   }
+  // ✍️ Títulos con IA (owner's request 2026-11-27): the «About this item» points of a product
+  // page (public), so the AI writes titles with the product's real details. At most 5 × 200.
+  function productBulletsFromHtml(html){
+    const s=String(html||""), at=s.indexOf('id="feature-bullets"');
+    if(at<0) return [];
+    const text=v=>v.replace(/<[^>]*>/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'").replace(/&nbsp;/g," ").replace(/&[a-z#0-9]+;/gi," ").replace(/\s+/g," ").trim();
+    return [...s.slice(at,at+20000).matchAll(/<span class="a-list-item">([\s\S]*?)<\/span>/g)].map(m=>text(m[1])).filter(t=>t.length>=10).slice(0,5).map(t=>t.slice(0,200));
+  }
+  // The ASIN of the search result that shows this picture id (Creator Hub's tag window shows
+  // the product's picture and name, not its ASIN). '' when no result has that exact picture.
+  function asinByImageFromSearchHtml(html,imageId){
+    if(!/^[A-Za-z0-9+_-]{6,40}$/.test(String(imageId||""))) return "";
+    for(const part of String(html||"").split('data-asin="').slice(1)){
+      const asin=part.slice(0,10);
+      if(/^[A-Z0-9]{10}"/.test(part.slice(0,11))&&part.includes("/images/I/"+imageId+".")) return asin;
+    }
+    return "";
+  }
   // 🩺 Revisor de variantes (owner's request 2026-11-22). Since 14 Apr 2026 Amazon pays the
   // onsite commission only for the same ASIN variant (or one in the same category) as the
   // product page the video is on (Associates agreement, «What's changed»).
@@ -2465,6 +2627,16 @@
   // something to tell, newest first, in Spanish (translations in lib/i18n.js). A small
   // fix with nothing to tell gets no entry, so it shows nothing.
   const RELEASE_NOTES=Object.freeze([
+    {version:"25.54.0",items:["✨ Títulos con IA en Creator Hub: junto a «Título», Mila.Desk te propone 5 títulos de 60 caracteres o menos para tu video, con tu estilo y los datos del producto etiquetado. Para suscripciones pagadas.",
+      "🏷️ Etiquetar productos: junto a «Buscar en Amazon» salen tus campañas aceptadas con todos sus productos, y «Usar este ASIN» lo busca por ti.",
+      "🩺 Hospital de videos: te dice cuántas veces sale cada video («Sale en X de cada 10 visitas»), marca en amarillo los que salen poco y trae una revisión semanal con IA que te dice qué cambiar primero (para suscripciones pagadas). Ya no muestra borradores.",
+      "✉️ Radar: en las campañas grises (cupo completo) ahora puedes escribir a la marca, ver el producto o abrir la campaña.",
+      "📨 Mensajes a marcas: cada campaña muestra la foto y el nombre de su producto.",
+      "🧰 Kit Premium: una barra para pasar de una herramienta a otra. Pinterest llega pronto.",
+      "⬇ Descargar mis videos: marca los que quieras o «Descargar todos», en un solo ZIP o uno por uno a tu carpeta de Descargas.",
+      "🎟️ Panel de mentoras e influencers: al copiar un código queda tachado al final de la lista; si la persona no lo usó, lo vuelves a poner disponible.",
+      "💳 Si usaste un código con tarjeta y te falta ponerla, Mila.Desk te muestra los pasos para terminar. Si no te llegó el correo de confirmación, ahora puedes pedir otro.",
+      "🔧 Arreglos: el Hospital y el panel de afiliada abren bien, y el análisis completo de conversaciones tiene más espacio para guardarse."]},
     {version:"25.53.1",items:["🎯 Galería y carrusel más exactos: Amazon muestra solo una parte de los videos en cada visita, así que Mila.Desk ahora revisa varias veces antes de decir que tu video no aparece."]},
     {version:"25.53.0",items:["🩺 Hospital de videos: revisa todos tus videos y te dice cuáles muestra Amazon (en verde) y cuáles no salen ni en la galería ni en el carrusel (en rojo). También te avisa si tu video está en otra variante que la de tu campaña.",
       "🚫 Marcas tachadas: tacha las marcas que no envían muestras o que no responden. Salen tachadas en el Radar y en tus campañas, y nunca reciben mensajes masivos.",
@@ -2515,8 +2687,12 @@
     return {icon,title,text:s};
   }
 
+  // 📌 Pinterest shows as «Próximamente» (owner's request 2026-11-26): the button and the Kit bar
+  // show it with the tag and the page explains what is coming. false = the tool opens.
+  const PINTEREST_SOON=true;
   root.MilaCore=Object.freeze({
-    RELEASE_NOTES,compareVersions,releaseNotesSince,releaseNoteParts,creatorHandleFromHtml,isDefaultCreatorHandle,storefrontNameFromHtml,buildTasks,TASK_DONE_STAGES,tasksShareText,ORDER_FILTERS,ordersPageUrl,mergeOrderItems,productAvailabilityFromHtml,storeReviewGroups,MEDIA_KIT_NETWORKS,MEDIA_KIT_MAX_VIDEOS,storefrontPhotoFromHtml,mediaKitSlug,isMediaKitSlug,cleanMediaKit,mediaKitStats,videoHlsFromHtml,storefrontVideoItems,hlsBestVariant,hlsSegments,videoFileName,MEDIA_KIT_PROOF_TYPES,MEDIA_KIT_PROOF_MAX,mediaKitProofType,TASK_SHARE_SECTIONS,watchLevel,watchedCampaign,campaignAcceptBody,
+    PINTEREST_SOON,
+    RELEASE_NOTES,compareVersions,releaseNotesSince,releaseNoteParts,creatorHandleFromHtml,isDefaultCreatorHandle,storefrontNameFromHtml,buildTasks,TASK_DONE_STAGES,tasksShareText,ORDER_FILTERS,ordersPageUrl,mergeOrderItems,presenceAdd,presenceStats,presenceText,presenceSplit,presenceChangeText,titleLogUpdate,productAvailabilityFromHtml,productBulletsFromHtml,asinByImageFromSearchHtml,storeReviewGroups,MEDIA_KIT_NETWORKS,MEDIA_KIT_MAX_VIDEOS,storefrontPhotoFromHtml,mediaKitSlug,isMediaKitSlug,cleanMediaKit,mediaKitStats,videoHlsFromHtml,storefrontVideoItems,hlsBestVariant,hlsSegments,videoFileName,MEDIA_KIT_PROOF_TYPES,MEDIA_KIT_PROOF_MAX,mediaKitProofType,TASK_SHARE_SECTIONS,watchLevel,watchedCampaign,campaignAcceptBody,
     decodeBase64Loose,extractEntityId,conversationStorageKey,analyzeContextToken,summarizeKeyDiagnostics,
     buildEntityKeyMap,resolveStorageKey,dedupeResultsByEntity,mergeCloudAndLocalResults,
     lastMessageIso,buildEntityIndex,needsAnalysis,groupRowsByColumns,runPool,
@@ -2533,8 +2709,8 @@
     mergeDemandObservation,
     toRadarRow,extractRadarRows,mergeRadarRow,radarFromDetailText,formatBudgetShort,normalizeBrand,freeSampleBrandSet,freeSampleCampaignUrl,SAMPLE_CATEGORIES,knownSampleCategories,brandCategoryNodes,sampleCategoryNames,sampleCategoryOptions,matchesSampleCategory,uniqueBrandNames,freeSampleDuplicate,conversationPositionHint,staleViCacheKeys,radarKey,radarStatus,
     SAVED_MESSAGE_LIMITS,ADDRESS_MESSAGE_ID,defaultSavedMessages,normalizeSavedMessages,fillMessageTemplate,savedMessageParts,tooLongParts,
-    storefrontVideoUrl,isStorefrontVideoUrl,videoSubmissions,BACKUP_DOCS,BACKUP_ALWAYS_MERGE,BACKUP_MAX_BYTES,mergeBackupDoc,backupSize,
-    OUTREACH_LIMITS,outreachBrandRows,outreachLabel,outreachAnalysisMap,outreachParts,outreachSendOk,outreachChat,addOutreachHistory,
+    storefrontVideoUrl,creatorEditUrl,isStorefrontVideoUrl,videoSubmissions,BACKUP_DOCS,BACKUP_ALWAYS_MERGE,BACKUP_MAX_BYTES,mergeBackupDoc,backupSize,
+    OUTREACH_LIMITS,outreachBrandRows,asinInfoBody,asinInfoProducts,affiliateLink,asinFromText,shortProductName,pinTexts,outreachLabel,outreachAnalysisMap,outreachParts,outreachSendOk,outreachChat,addOutreachHistory,
     recordScore,siblingsFromHtml,variantSearchRows,otherVariantOpen,hospitalStoreItems,saysNoSamples,noSampleSuggestions,BLOCK_REASONS,addBlockedBrand,blockedEntry,blockedReasonText,FOLLOW_UP_DAYS,FOLLOW_UP_NO_REPLY,outreachNextAllowed,outreachTooSoon,addFollowUp,followUpView,brandAnsweredLast,
     CODE_BATCH_LIMIT,groupBetaCodes,codeBatchCsv,mentorStudentState,mentorSummary,mentorFreeYearEnd,firstPaidCharge,earningsSummary,earningsCsv,mentorCommissions,commissionRate,mentorRateNow,freeDaysLeft,partnerActivity,
     ORIGIN,ACCESS_PLAN_LABELS,normalizeAccess,describeAccess,accessPlanLabel,profileInitial,identifiedSalesDays,redeemMessage,FEEDBACK_LIMITS,feedbackBrowser,feedbackCheck,feedbackMessage,
